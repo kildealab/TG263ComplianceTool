@@ -3,6 +3,7 @@ import os
 import time
 import json
 import pydicom as dcm
+import pandas as pd 
 
 start_time = time.time()
 
@@ -31,14 +32,16 @@ def find_RS_files_recursive(PATH):
 
 # 	if not os.path.isfile(os.path.join(json_path,"name_conversions.json")):
 
-def load_json(json_path="."):
-	json_file = os.path.join(json_path,"name_conversions.json")
-	if os.path.isfile(json_file):
-		with open(json_file) as f:
-			json_data = json.load(f)
-			return json_data
-	else:
-		return {}
+# def load_json(json_path="."):
+# 	json_file = os.path.join(json_path,"name_conversions.json")
+# 	if os.path.isfile(json_file):
+# 		with open(json_file) as f:
+# 			json_data = json.load(f)
+# 			return json_data
+# 	else:
+# 		return {}
+
+
 
 def find_ROI_names(RS, keyword='', avoid=[]):
     '''
@@ -69,21 +72,30 @@ def load_RS_names(rs_files):
 
 
 
-# def initialize_csv(csv_path="."):
-# 	if not os.path.isfile(os.path.join(json_path,"name_conversions.csv")):
+def load_csv(csv_path="."):
+	csv_file = os.path.join(csv_path,"name_conversions.csv")
+	if os.path.isfile(csv_file):
+		df = pd.read_csv(csv_file)
+		cols = list(df)
 
+		return df[cols[0]].to_list()
+	else:
+		return []
 
 rs_files = find_RS_files_recursive('/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/')
 print(rs_files)
 
-json_data = load_json()
-print(json_data)
+# json_data = load_json()
+# print(json_data)
 
 names = load_RS_names(rs_files)
 print(names)
 
 print(len(rs_files))
 print(len(names))
+
+cols = load_csv()
+print(cols)
 
 
 print("*********", time.time() - start_time,  "*********")
