@@ -4,6 +4,7 @@ import time
 import json
 import pydicom as dcm
 import pandas as pd 
+import csv
 
 start_time = time.time()
 
@@ -125,14 +126,62 @@ print(len(tg_names_rev))
 
 names_to_convert = []
 
+# note: ~ used to denote partial structures, e.g. Brain~, Lung~_L
+temp_struct_avoid = []#['nos','~','z_']
 for name in rt_names:
-	if name in tg_names:
-		k = 1
-		# print("YES:",name)
-	else:
-		print("NO",name)
-		names_to_convert.append(name)
+	if not any(keyword in name for keyword in temp_struct_avoid):
+		if name in tg_names:
+			k = 1
+			# print("YES:",name)
+		else:
+			print("NO",name)
+			names_to_convert.append(name)
 
 print(len(names_to_convert))
+
+
+proposed_names = []
+# TO DO : fix this weird loop/if mess
+
+for name in names_to_convert:
+	found = False
+	# print(name)
+	for tg_name in tg_names:
+		if not found and name.lower() == tg_name.lower():
+			proposed_names.append(tg_name)
+			found = True
+			# print(tg_name)
+		elif not found and name.lower() in tg_name.lower():
+			proposed_names.append(tg_name)
+			found = True
+			# print(tg_name)
+		elif not found and tg_name.lower() in name.lower():
+			proposed_names.append(tg_name)
+			found = True
+			# print(tg_name)
+		# 
+	if not found:
+		proposed_names.append('')
+		# print(tg_name)
+
+print(proposed_names)
+
+print(len(names_to_convert))
+
+print(len(proposed_names))
+
+	
+		
+
+
+
+
 print("*********", time.time() - start_time,  "*********")
 
+# data_to_write = [[x] for x in names_to_convert]
+with open("names_to_convert.csv","w") as f:
+	writer = csv.writer(f)
+	writer.writerow(["non-compliant name","TG-263 suggestion"])
+	writer.writerows(zip(names_to_convert,proposed_names))
+# df = pd.DataFrame({"Non-compliant Nomenclature":names_to_convert})
+# df.to_csv(index=False)

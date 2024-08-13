@@ -1,0 +1,98 @@
+non-compliant name,TG-263 suggestion
+BODY,Body
+SHOULDERS,
+POST AVOID,
+MIDDLE AVOID,
+RING 70,
+PharCon_Mid,
+TemporalLobe_L,
+OpticNerve_L,
+SubmndSalv_R,
+Brainstem_PRV5,Brain
+PharCon_Sup,
+Esophagus_Upper,Esophagus
+BrachialPlexus_R,
+BrachialPlexus_L,
+Mandible,Bone_Mandible
+Chiasm,OpticChiasm
+Level_Retropha_R,
+Level_Retropha_L,
+SubmndSalv_L,
+BoneRadCalc,Bone
+OpticNerve_R,
+TemporalLobe_R,
+SpinalCord_PRV5,SpinalCord
+PharCon_Inf,
+OralCavity,
+Thyroid,Cartlg_Thyroid
+RING 60,
+RING 56,
+AVOID 60,
+AVOID 56,
+PTV_ALL,PTV
+PTV70+PTV60,PTV
+PAROTID_L_NOS,Parotid_L
+PAROTID_R_NOS,Parotid_R
+LUNG_L,Lung_L
+LUNG_R,Lung_R
+ESOPHAGUS_2CM,Esophagus
+CARINA,Carina
+CTV70,CTV
+PTV70,PTV
+CTV60,CTV
+CTV56,CTV
+PTV60,PTV
+PTV56,PTV
+Density Override,Dens
+Normal 1,
+Normal 2,
+Normal 3,
+POST Avoid30,
+z_Air,
+SpinalCord~_PRV5,SpinalCord
+SpinalCord~,SpinalCord
+PTV_6600,PTV
+PTV!_5940,PTV
+PTV!_5600,PTV
+Lung~_R,
+Lung~_L,
+LN_NECK_R,LN
+LN_NECK_L,LN
+Esophagus~^2cm,Esophagus
+CTV_6600,CTV
+CTV_5940,CTV
+CTV_5600,CTV
+Brainstem_PRV05,Brain
+Bones^RadCalc,Bone
+zDensityOverride,Dens
+z_Shoulder,
+z_Ring_6600,
+z_Ring_5940,
+z_Ring_5600,
+z_PTV_All,PTV
+z_Larynx_LEV,Larynx
+z_Avoid_Post,
+Cavity_Oral-PTV,Cavity_Oral
+z_AVOID61.6-HARD,
+z_AVOID61.6,
+z_AVOID65.3,
+z_AVOID65.3-HARD,
+z_BP_L_OS_MR59.4,
+z_BRAIN_LEV,Brain
+z_ESO_LEV,
+z_MAND_OS_MRG_66,
+z_ORALCAV_NOS,
+z_PHARYNX_NOS,Pharynx
+CouchSurface,
+CouchInterior,
+z_COVER_ANT_66,
+z_REMOVE59.4-1,
+M1_PTV_6600,PTV
+M1_PTV!_5940,PTV
+M1_PTV!_5600,PTV
+M1_CTV_6600,CTV
+M1_CTV_5940,CTV
+M1_CTV_5600,CTV
+z_REMOVE66.0-1,
+z_COVER56-1,
+z_REMOVE70.6-1,
