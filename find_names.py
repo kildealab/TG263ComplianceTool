@@ -82,20 +82,48 @@ def load_csv(csv_path="."):
 	else:
 		return []
 
+def load_tg_263(tg_path=".",tg_name="TG263_Nomenclature_Worksheet_20170815(TG263 v20170815).csv"):
+	df = pd.read_csv(os.path.join(tg_path,tg_name))
+	tg_names = df['TG263-Primary Name'].to_list()
+	tg_names_rev = df['TG-263-Reverse Order Name'].to_list()
+	return tg_names, tg_names_rev
+
 rs_files = find_RS_files_recursive('/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/')
 print(rs_files)
 
 # json_data = load_json()
 # print(json_data)
 
-names = load_RS_names(rs_files)
-print(names)
+new_names = load_RS_names(rs_files)
+print(new_names)
 
 print(len(rs_files))
-print(len(names))
+print(len(new_names))
 
-cols = load_csv()
-print(cols)
+rt_names = load_csv()
+print(rt_names)
+
+for list_name in new_names:
+	for name in list_name:
+
+		# if name.lower() not in rt_names:
+		# 	rt_names.append(name.lower())
+		if name not in rt_names:
+			rt_names.append(name)
+		else:
+			print(name)
+
+# print(rt_names)
+
+tg_names, tg_names_rev = load_tg_263()
+print(len(tg_names))
+print(len(tg_names_rev))
+
+for name in rt_names:
+	if name in tg_names:
+		print("YES:",name)
+	else:
+		print("NO:",name)
 
 
 print("*********", time.time() - start_time,  "*********")
