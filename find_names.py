@@ -5,6 +5,7 @@ import json
 import pydicom as dcm
 import pandas as pd 
 import csv
+import re
 
 start_time = time.time()
 
@@ -24,6 +25,8 @@ def find_RS_files_recursive(PATH,avoid_root_keywords=[]):
 			# file_path = os.path.join(root, file)
 			# print(root)
 			if not any(keyword in root for keyword in avoid_root_keywords):
+			# if "_CBCT_" not in root and 'old' not in root:
+				print(root)
 				rs_files.append(os.path.join(root, file))
 
 		#     print(os.path.join(root, file))
@@ -93,18 +96,23 @@ def load_tg_263(tg_path=".",tg_name="TG263_Nomenclature_Worksheet_20170815(TG263
 	tg_names_rev = df['TG-263-Reverse Order Name'].to_list()
 	return tg_names, tg_names_rev
 
-rs_files = find_RS_files_recursive('/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/',avoid_root_keywords=["_CBCT_","PlanAdapt"])
-print(rs_files)
+# def list_to_csv(data_list,col_names=[]):
 
+
+rs_files = find_RS_files_recursive('/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/',avoid_root_keywords=["_CBCT_","PlanAdapt","QA"])
+print(rs_files)
+rs_files.sort()
 # json_data = load_json()
 # print(json_data)
 
 new_names = load_RS_names(rs_files)
 # print(new_names)
 
+
+
 print(len(rs_files))
 print(len(new_names))
-
+'''
 rt_names = load_csv()
 # print(rt_names)
 
@@ -119,11 +127,11 @@ for list_name in new_names:
 			print(name)
 
 print(rt_names)
-
+'''
 tg_names, tg_names_rev = load_tg_263()
 print(len(tg_names))
 print(len(tg_names_rev))
-
+'''
 names_to_convert = []
 
 # note: ~ used to denote partial structures, e.g. Brain~, Lung~_L
@@ -134,7 +142,7 @@ for name in rt_names:
 			k = 1
 			# print("YES:",name)
 		else:
-			print("NO",name)
+			# print("NO",name)
 			names_to_convert.append(name)
 
 print(len(names_to_convert))
@@ -169,19 +177,103 @@ print(proposed_names)
 print(len(names_to_convert))
 
 print(len(proposed_names))
+'''
+def check_name_TG(name,tg_names):
 
-	
-		
+	for tg_name in tg_names:
+		if name.lower() == tg_name.lower():
+			return tg_name, "casing"
+		elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) == re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
+			if "~" in name:
+				if name.endswith("~") or name.endswith("~_R") or name.endswith("~_L")
+				return tg_name, "CHECK ~"
+			return tg_name, "symbols"
+		elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) in re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
+			return tg_name, ""
+		elif re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')) == re.sub(r'[^\w]', '', name.lower().replace(' ','')):
+			return tg_name, ""
+		# 
+	return '',''
+
+col_file = []
+col_name = []
+col_match = []
+col_propname = []
+col_reason = []
+
+for i in range(len(rs_files)):
+	for j in range(len(new_names[i])):
+		print(i,j)
+		col_file.append(rs_files[i])
+
+		name = new_names[i][j]
+		# print(name)
+
+		if name in col_name:
+			index = col_name.index(name)
+			col_name.append(name)
+			col_match.append(col_match[index])
+			col_propname.append(col_propname[index])
+			col_reason.append(col_reason[index])
+
+			# print("namealready in")
+
+		else:
+			# print("name not in ")
+			col_name.append(name)
+
+			if name in tg_names:
+				col_match.append("True")
+				col_propname.append("")
+				col_reason.append("")
+
+			else:
+				proposed_name, reason = check_name_TG(name,tg_names)
+				col_match.append("False")
+				if reason == '':
+					if 'avoid' in name.lower():
+						reason = "avoid"
+					elif "z_" in name.lower():
+						reason = "z"
+					elif "nos" in name.lower():
+						reason = "nos"
+					elif "TV" in name:
+						reason = "PTV/CTV/GTV"
+
+				col_propname.append(proposed_name)
+				col_reason.append(reason) 
 
 
+# overwrite = True
+# if not os.path.isfile("full_list_structs.csv") or overwrite == True:
 
+# 	with open("full_list_structs.csv","w") as f:
+# 		writer = csv.writer(f)
+# 		writer.writerow(["File","In-House Name","Matches TG-263","TG-263 suggestion","Reason"])
+# else:
+# 	with open("full_list_structs.csv","a") as f:
+# 		writer = csv.writer(f)
+# 		writer.writerows(zip(col_file, col_name,col_match,col_propname,col_reason))
+
+with open("full_list_structs.csv","w") as f:
+	writer = csv.writer(f)
+	writer.writerow(["File","In-House Name","Matches TG-263","TG-263 suggestion","Reason"])
+	writer.writerows(zip(col_file, col_name,col_match,col_propname,col_reason))
 
 print("*********", time.time() - start_time,  "*********")
 
-# data_to_write = [[x] for x in names_to_convert]
-with open("names_to_convert.csv","w") as f:
-	writer = csv.writer(f)
-	writer.writerow(["non-compliant name","TG-263 suggestion"])
-	writer.writerows(zip(names_to_convert,proposed_names))
+# data_to_write = [[x] for x in rs_files]
+# with open("names_to_convert.csv","w") as f:
+# 	writer = csv.writer(f)
+# 	writer.writerows(data_to_write)
+
+# # data_to_write = [[x] for x in names_to_convert]
+# with open("names_to_convert.csv","w") as f:
+# 	writer = csv.writer(f)
+# 	writer.writerow(["non-compliant name","TG-263 suggestion"])
+# 	writer.writerows(zip(names_to_convert,proposed_names))
+
+
+
 # df = pd.DataFrame({"Non-compliant Nomenclature":names_to_convert})
 # df.to_csv(index=False)
