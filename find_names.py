@@ -98,8 +98,22 @@ def load_tg_263(tg_path=".",tg_name="TG263_Nomenclature_Worksheet_20170815(TG263
 
 # def list_to_csv(data_list,col_names=[]):
 
+# path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
+path = '/mnt/iDriveShare/Kayla/CBCT_images/Kayla_extracted/'
 
-rs_files = find_RS_files_recursive('/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/',avoid_root_keywords=["_CBCT_","PlanAdapt","QA"])
+check_file = True
+write_files = False
+if check_file and os.path.isfile('names_to_convert.csv'):
+	with open('names_to_convert.csv','r') as f:
+		rs_files = [row[0] for row in csv.reader(f)]
+else:
+	rs_files = find_RS_files_recursive(path,avoid_root_keywords=["_CBCT_","PlanAdapt","QA","old","TEST"])
+	data_to_write = [[x] for x in rs_files]
+	if write_files:
+		with open("names_to_convert.csv","w") as f:
+			writer = csv.writer(f)
+			writer.writerows(data_to_write)
+
 print(rs_files)
 rs_files.sort()
 # json_data = load_json()
@@ -185,7 +199,8 @@ def check_name_TG(name,tg_names):
 			return tg_name, "casing"
 		elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) == re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
 			if "~" in name:
-				if name.endswith("~") or name.endswith("~_R") or name.endswith("~_L")
+				if name.endswith("~") or name.endswith("~_R") or name.endswith("~_L"):
+					return tg_name,"SB OK"
 				return tg_name, "CHECK ~"
 			return tg_name, "symbols"
 		elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) in re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
@@ -197,38 +212,79 @@ def check_name_TG(name,tg_names):
 
 col_file = []
 col_name = []
+col_length = []
 col_match = []
 col_propname = []
 col_reason = []
+col_type = []
+col_rules = []
+
+uniq_name = []
+uniq_length = []
+uniq_match = []
+uniq_propname = []
+uniq_reason = []
+uniq_type = []
+uniq_rules = []
+instances=[]
+
 
 for i in range(len(rs_files)):
+	print(i)
 	for j in range(len(new_names[i])):
-		print(i,j)
-		col_file.append(rs_files[i])
+		
+		col_file.append(rs_files[i].replace(path,""))
 
 		name = new_names[i][j]
+
 		# print(name)
 
 		if name in col_name:
 			index = col_name.index(name)
 			col_name.append(name)
+			col_length.append(len(name))
 			col_match.append(col_match[index])
 			col_propname.append(col_propname[index])
 			col_reason.append(col_reason[index])
+			col_type.append(col_type[index])
+			col_rules.append(col_rules[index])
+
+			uniq_index = uniq_name.index(name)
+			instances[uniq_index] += 1
 
 			# print("namealready in")
 
 		else:
-			# print("name not in ")
 			col_name.append(name)
+			
+
+			uniq_name.append(name)
+			uniq_length.append(len(name))
+			instances.append(1)
+
+			col_length.append(len(name))
+
+			if "gtv" in name.lower() or "ctv" in name.lower() or "ptv" in name.lower():
+				struct_type = "target"
+				
+			else:
+				struct_type = "non-target"
+			col_type.append(struct_type)
+
 
 			if name in tg_names:
+				match = True
 				col_match.append("True")
 				col_propname.append("")
 				col_reason.append("")
+				col_rules.append("")
+				proposed_name =""
+				reason = ""
+				rules = []
 
 			else:
 				proposed_name, reason = check_name_TG(name,tg_names)
+				match = False
 				col_match.append("False")
 				if reason == '':
 					if 'avoid' in name.lower():
@@ -242,6 +298,26 @@ for i in range(len(rs_files)):
 
 				col_propname.append(proposed_name)
 				col_reason.append(reason) 
+
+				rules = []
+				if struct_type == "target":
+					rules.append("TBD")
+				else:
+					if len(name) > 16:
+						rules.append(1)
+					#to do: rules 2, 3, etc.
+					if reason=="casing":
+						rules.append(4)
+					if " " in name:
+						rules.append(5)
+				col_rules.append(rules)
+
+			
+			uniq_match.append(match)
+			uniq_propname.append(proposed_name)
+			uniq_reason.append(reason)
+			uniq_type.append(struct_type)
+			uniq_rules.append(rules)
 
 
 # overwrite = True
@@ -257,15 +333,16 @@ for i in range(len(rs_files)):
 
 with open("full_list_structs.csv","w") as f:
 	writer = csv.writer(f)
-	writer.writerow(["File","In-House Name","Matches TG-263","TG-263 suggestion","Reason"])
-	writer.writerows(zip(col_file, col_name,col_match,col_propname,col_reason))
+	writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
+	writer.writerows(zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
+
+with open("unique_list_structs.csv","w") as f:
+	writer = csv.writer(f)
+	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
+	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type,uniq_rules))
 
 print("*********", time.time() - start_time,  "*********")
 
-# data_to_write = [[x] for x in rs_files]
-# with open("names_to_convert.csv","w") as f:
-# 	writer = csv.writer(f)
-# 	writer.writerows(data_to_write)
 
 # # data_to_write = [[x] for x in names_to_convert]
 # with open("names_to_convert.csv","w") as f:
