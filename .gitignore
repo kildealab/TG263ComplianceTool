@@ -1,1 +1,5 @@
-*.csv
+names_to_convert.csv
+unique_list_structs.csv
+full_list_structs.csv
+
+
