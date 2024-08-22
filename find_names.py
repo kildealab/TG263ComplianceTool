@@ -210,6 +210,39 @@ def check_name_TG(name,tg_names):
 		# 
 	return '',''
 
+def check_target_compliance(target_name):
+
+	target_prefix = name[0:3]
+	target_suffix = name[3:]
+	print("prefix", target_prefix)
+	print("suffix", target_suffix)
+
+	is_correct = True
+	reasoning = ''
+
+
+	# #1 check first characters (to do add ICTV etc) -- todo change to starts with to add all
+	if target_prefix != 'PTV' and != 'GTV' and != 'CTV':
+		return False,'wrong prefix'
+	
+	# #2 check classifier
+	if target_suffix[0] in ['n', 'p', 'sb', 'par', 'v', 'vas']:
+		r
+
+	# check if PTV_High, Mid, Low, etc.
+
+	if target_suffix in ["_High", "_Mid","_Low"]
+		return True, 'high/low/mid'
+
+
+	# check if cGy dose
+	if target_suffix[0] =="_" and len(target_suffix[1:]) == 4 and target_suffix[1:].isdigit():
+		return True, "dose in cGy"
+
+
+
+
+
 col_file = []
 col_name = []
 col_length = []
@@ -283,7 +316,10 @@ for i in range(len(rs_files)):
 				rules = []
 
 			else:
-				proposed_name, reason = check_name_TG(name,tg_names)
+				if struct_type == "non-target":
+					proposed_name, reason = check_name_TG(name,tg_names, struct_type)
+				else:
+					#TODO call fn
 				match = False
 				col_match.append("False")
 				if reason == '':
@@ -293,8 +329,8 @@ for i in range(len(rs_files)):
 						reason = "z"
 					elif "nos" in name.lower():
 						reason = "nos"
-					elif "TV" in name:
-						reason = "PTV/CTV/GTV"
+					# elif "TV" in name:
+					# 	reason = "PTV/CTV/GTV"
 
 				col_propname.append(proposed_name)
 				col_reason.append(reason) 
