@@ -237,6 +237,7 @@ for i in range(len(rs_files)):
 
 			else:
 				if struct_type == "non-target":
+					
 					proposed_name, reason = check_name_TG(name,tg_names)
 					match = False
 				else:

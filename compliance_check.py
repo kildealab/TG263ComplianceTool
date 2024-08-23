@@ -34,6 +34,9 @@ def check_target_compliance(target_name,tg_names=[]):
 		reason = "> 16 characters"
 		return False, reason
 	
+    if "^" in target_name: # Rule 9, ignore custom notes after ^
+        target_name = target_name[:target_name.index("^")]
+
 	target_prefix = target_name.split("_")[0]
 	target_suffix = target_name.replace(target_prefix,'')
 	
@@ -68,10 +71,10 @@ def check_target_compliance(target_name,tg_names=[]):
 	
 	
 	if target_prefix != '':
-		if target_prefix[0] == "^": # rule 9
-			if debug:
-				print("its true, all after ^")
-			return True, reason
+		# if target_prefix[0] == "^": # rule 9
+		# 	if debug:
+		# 		print("its true, all after ^")
+		# 	return True, reason
 		prefix_no_digits = target_prefix.rstrip(string.digits)
 		if debug:
 			print("prefix no digits:",prefix_no_digits)
