@@ -1,82 +1,18 @@
-import glob
+# import glob
 import os
 import time
-import json
-import pydicom as dcm
+# import json
+# import pydicom as dcm
 import pandas as pd 
 import csv
-import re
+# import re
+
+from parse_DICOM_RS import load_RS_names, find_RS_files_recursive
+from compliance_check import check_name_TG, check_target_compliance
+from parse_xml_template import load_xml_data
 
 start_time = time.time()
 
-
-
-def find_RS_files_recursive(PATH,avoid_root_keywords=[]):
-	# rs_files = glob.glob()
-	# list_all_files = []
-	rs_files = []
-
-	for root, dirs, files in os.walk(PATH):
-		# list_all_files.append()
-		# print(root,len(files))
-		# print(os.path.join(root, file))
-
-		for file in [f for f in files if f[0:2]=='RS']:
-			# file_path = os.path.join(root, file)
-			# print(root)
-			if not any(keyword in root for keyword in avoid_root_keywords):
-			# if "_CBCT_" not in root and 'old' not in root:
-				print(root)
-				rs_files.append(os.path.join(root, file))
-
-		#     print(os.path.join(root, file))
-
-	# rs_files = glob.glob(os.path.join(PATH, '**', 'RS*'), recursive=True)
-	# for file in rs_files:
-	# 	print(file)
-	return rs_files
-
-# def initialize_json(json_path="."):
-
-# 	if not os.path.isfile(os.path.join(json_path,"name_conversions.json")):
-
-# def load_json(json_path="."):
-# 	json_file = os.path.join(json_path,"name_conversions.json")
-# 	if os.path.isfile(json_file):
-# 		with open(json_file) as f:
-# 			json_data = json.load(f)
-# 			return json_data
-# 	else:
-# 		return {}
-
-
-
-def find_ROI_names(RS, keyword='', avoid=[]):
-    '''
-    find_ROI_names  finds all contour names in RT Structure Set File containing keyword, 
-                    while ignoring those containing 'nos' and 'z_'.
-    
-    :param RS: the RS file opened by pydicom
-    :param keyword: The keyword to search the ROIs for. If blank returns all ROIs.
-    
-    :returns: list of ROI names containing keyword.
-    '''
-    ROI_names = []
-
-    for seq in RS.StructureSetROISequence:
-        roi_name = seq.ROIName
-        # TO DO -- custom avoid
-        # if keyword.lower() in roi_name.lower() and 'nos' not in roi_name.lower() and 'z_' not in roi_name.lower():
-        if keyword.lower() in roi_name.lower():
-            ROI_names.append(seq.ROIName)
-    return ROI_names
-
-def load_RS_names(rs_files):
-	list_names = []
-	for file in rs_files:
-		RS = dcm.read_file(file)
-		list_names.append(find_ROI_names(RS))
-	return list_names
 
 
 
@@ -96,36 +32,37 @@ def load_tg_263(tg_path=".",tg_name="TG263_Nomenclature_Worksheet_20170815(TG263
 	tg_names_rev = df['TG-263-Reverse Order Name'].to_list()
 	return tg_names, tg_names_rev
 
-# def list_to_csv(data_list,col_names=[]):
 
-# path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
-path = '/mnt/iDriveShare/Kayla/CBCT_images/Kayla_extracted/'
-
-check_file = True
-write_files = False
-if check_file and os.path.isfile('names_to_convert.csv'):
-	with open('names_to_convert.csv','r') as f:
-		rs_files = [row[0] for row in csv.reader(f)]
-else:
-	rs_files = find_RS_files_recursive(path,avoid_root_keywords=["_CBCT_","PlanAdapt","QA","old","TEST"])
-	data_to_write = [[x] for x in rs_files]
-	if write_files:
-		with open("names_to_convert.csv","w") as f:
-			writer = csv.writer(f)
-			writer.writerows(data_to_write)
-
-print(rs_files)
-rs_files.sort()
-# json_data = load_json()
-# print(json_data)
-
-new_names = load_RS_names(rs_files)
-# print(new_names)
+def load_RS_data(path,check_file = False, write_files = False):
 
 
+	if check_file and os.path.isfile('names_to_convert.csv'):
+		with open('names_to_convert.csv','r') as f:
+			rs_files = [row[0] for row in csv.reader(f)]
+	else:
+		rs_files = find_RS_files_recursive(path)#,avoid_root_keywords=["_CBCT_","PlanAdapt","QA","old","TEST"])
+		data_to_write = [[x] for x in rs_files]
+		if write_files:
+			with open("names_to_convert.csv","w") as f:
+				writer = csv.writer(f)
+				writer.writerows(data_to_write)
 
-print(len(rs_files))
-print(len(new_names))
+	# print(rs_files)
+	rs_files.sort()
+	# json_data = load_json()
+	# print(json_data)
+
+	new_names = load_RS_names(rs_files)
+	# print(new_names)
+
+	return rs_files, new_names
+
+
+path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
+# path = '/mnt/iDriveShare/Kayla/CBCT_images/Kayla_extracted/'
+
+
+
 '''
 rt_names = load_csv()
 # print(rt_names)
@@ -192,55 +129,8 @@ print(len(names_to_convert))
 
 print(len(proposed_names))
 '''
-def check_name_TG(name,tg_names):
 
-	for tg_name in tg_names:
-		if name.lower() == tg_name.lower():
-			return tg_name, "casing"
-		elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) == re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
-			if "~" in name:
-				if name.endswith("~") or name.endswith("~_R") or name.endswith("~_L"):
-					return tg_name,"SB OK"
-				return tg_name, "CHECK ~"
-			return tg_name, "symbols"
-		elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) in re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
-			return tg_name, ""
-		elif re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')) == re.sub(r'[^\w]', '', name.lower().replace(' ','')):
-			return tg_name, ""
-		# 
-	return '',''
-
-def check_target_compliance(target_name):
-
-	target_prefix = name[0:3]
-	target_suffix = name[3:]
-	print("prefix", target_prefix)
-	print("suffix", target_suffix)
-
-	is_correct = True
-	reasoning = ''
-
-
-	# #1 check first characters (to do add ICTV etc) -- todo change to starts with to add all
-	if target_prefix != 'PTV' and != 'GTV' and != 'CTV':
-		return False,'wrong prefix'
-	
-	# #2 check classifier
-	if target_suffix[0] in ['n', 'p', 'sb', 'par', 'v', 'vas']:
-		r
-
-	# check if PTV_High, Mid, Low, etc.
-
-	if target_suffix in ["_High", "_Mid","_Low"]
-		return True, 'high/low/mid'
-
-
-	# check if cGy dose
-	if target_suffix[0] =="_" and len(target_suffix[1:]) == 4 and target_suffix[1:].isdigit():
-		return True, "dose in cGy"
-
-
-
+            
 
 
 col_file = []
@@ -260,7 +150,23 @@ uniq_reason = []
 uniq_type = []
 uniq_rules = []
 instances=[]
+# TO DO # fix this -- right now just makine rs_files the template files
 
+# path =
+
+path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
+
+# path = '/mnt/iDriveShare/Kayla/CBCT_images/Kayla_extracted/'
+
+rs_files, new_names = load_RS_data(path)
+
+path = '/mnt/iDriveShare/Kayla/test_xmls/'
+rs_files, new_names = load_xml_data(path)
+
+check_file = True
+write_files = False
+print(rs_files, new_names)
+print("done calling load rs data")
 
 for i in range(len(rs_files)):
 	print(i)
@@ -297,7 +203,7 @@ for i in range(len(rs_files)):
 
 			col_length.append(len(name))
 
-			if "gtv" in name.lower() or "ctv" in name.lower() or "ptv" in name.lower():
+			if "gtv" in name.lower() or "ctv" in name.lower() or "ptv" in name.lower() or "itv" in name.lower():
 				struct_type = "target"
 				
 			else:
@@ -317,11 +223,13 @@ for i in range(len(rs_files)):
 
 			else:
 				if struct_type == "non-target":
-					proposed_name, reason = check_name_TG(name,tg_names, struct_type)
+					proposed_name, reason = check_name_TG(name,tg_names)
+					match = False
 				else:
-					#TODO call fn
-				match = False
-				col_match.append("False")
+					match, reason = check_target_compliance(name)
+					
+				
+				col_match.append(match)
 				if reason == '':
 					if 'avoid' in name.lower():
 						reason = "avoid"
@@ -376,6 +284,9 @@ with open("unique_list_structs.csv","w") as f:
 	writer = csv.writer(f)
 	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
 	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type,uniq_rules))
+
+
+
 
 print("*********", time.time() - start_time,  "*********")
 

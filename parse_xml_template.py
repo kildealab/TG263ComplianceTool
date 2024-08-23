@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import os
 
 def extract_root(path):
 	tree = ET.parse(path)
@@ -28,7 +29,10 @@ def get_structure_elements(root):
 		structure_id = structure.get("ID")
 		name = structure.get('Name')
 		volume_type = structure.find('Identification/VolumeType').text
-		struct_code = structure.find('Identification/StructureCode').get("Code")
+		try:
+			struct_code = structure.find('Identification/StructureCode').get("Code")
+		except:
+			struct_code = ''
 	#     print(structure.find('Identification/StructureCode').get("CodeScheme"))
 	#     colour_style = structure.find('ColorAndStyle').text
 
@@ -56,4 +60,24 @@ def parse_structure_xml(path):
 	return temp_id, temp_type, temp_app, temp_site, last_approval, ids, names, vol_type, codes
 
 
-path = '/mnt/iDriveShare/Kayla/StructureTemplates/StructureTemplate_27718.xml'
+
+def load_xml_data(PATH):
+	xml_files = []
+	names = []
+
+	for root, dirs, files in os.walk(PATH):
+		# list_all_files.append()
+		# print(root,len(files))
+		# print(os.path.join(root, file))
+
+		for file in [f for f in files if f.lower().endswith(".xml")]: # to do can also check the type inside the xml file
+			xml_files.append(file)
+
+	for file in xml_files:
+		_, _,_,_,_,name,_,_,_ = parse_structure_xml(PATH+file)
+		names.append(name)
+
+	return xml_files, names
+
+
+# path = '/mnt/iDriveShare/Kayla/StructureTemplates/StructureTemplate_27718.xml'
