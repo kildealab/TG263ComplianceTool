@@ -1,7 +1,7 @@
 import re
 import string
 
-def check_name_TG(name,tg_names):
+def get_proposed_name(name,tg_names):
 
 	for tg_name in tg_names:
 		if name.lower() == tg_name.lower():
@@ -16,10 +16,93 @@ def check_name_TG(name,tg_names):
 			return tg_name, ""
 		elif re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')) == re.sub(r'[^\w]', '', name.lower().replace(' ','')):
 			return tg_name, ""
-		# 
+
+
+		# add suggestions for common mispellings, common mistakes, adding ^ in front of garbage, etc
 	return '',''
 
 
+def check_TG_name(name, tg_names):
+	original_length = len(name)
+	reason = ''
+
+	if ' ' in name:
+		reason = "spaces"
+		return False, reason
+
+	if len(name) > 16:
+		reason = "> 16 characters"
+		return False, reason
+	
+	if "^" in name: # Rule 12, ignore custom notes after ^
+		name = name[:name.index("^")]
+
+	if name != '':
+		#rule #14 (asssuming doesnt matter after z?)
+		if name[0] =='z' or name[0] == "_":
+			return True, "ignored"
+
+		# check if names starts with a tg compliant name (NOTE TO DO THIS IS INEFFICIENT)
+# 		if not name.startswith(tuple(tg_names)): # rule 1
+# 			reason = "fails rule 1"
+# 			return False, reason
+		tg_start = False
+		for n in tg_names: 
+			if name.startswith(n):
+				tg_start = True
+				name = name.replace(n,'')
+				break
+			elif n.endswith("s") and (name.startswith(n[:-1]+"~") or (name.startswith(n[:-1]+"_PRV") and (name.endswith("_L") or name.endswith("_R")))):
+				tg_start = True
+				name = name.replace(n[:-1],'')
+				break
+			
+		if not tg_start:
+			return False, "Does not start with a TG compliant structure name"
+
+		#Rule 11
+		if name.startswith("~"):
+			# need to check about for eg STRUCT~_L_PRV or STRUCT~_PRV_L
+			name = name[1:]
+			if name[0:2] =="_L" or name[0:2]=="_R":
+				name = name[2:]
+		''' version if not cutting outtg name from prefix
+		if "~" in name:
+			split_name = name.split("~")
+			if split_name[0] in tg_names:
+				if split_name[1].startswith("_L"):
+					name = name.replace
+			 and (len(split_name[1])==0 or split_name[1]=="_L" or split_name[1]=="_R":
+		'''
+		# rule 10
+		if name.startswith("_PRV"):
+			name = name.replace('_PRV','')
+			
+			# check for xx digits after PRV
+			if bool(re.match(r'^\d{2}(?!\d)', name)):# if exactly 2 digits follow
+				name = name[2:]
+			elif bool(re.match(r'^\d{1}(?!\d)', name)) and original_length != 16:
+				return False, "PRV should have 2 digits for mm since doesn't exceed 16 characters"
+			elif bool(re.match(r'^\d{1}(?!\d)', name)):
+				name = name[1:]
+
+			# check if _L or _R follow PRV
+			if len(name)>1 and (name[0:2] == "_L" or name[0:2] == "_R"):
+				name = name[2:]
+
+
+
+
+	if name == '' or name[0] == "^": # can prob remove this now
+#             print("ALL GOODDDDDD")
+		return True, reason
+	else:
+#             print("FAILED~!", target_suffix)
+		reason = "Suffix leftover: " + name
+		return False, reason
+
+
+	
 
 
 def check_target_compliance(target_name,tg_names=[]):
@@ -34,8 +117,8 @@ def check_target_compliance(target_name,tg_names=[]):
 		reason = "> 16 characters"
 		return False, reason
 	
-    if "^" in target_name: # Rule 9, ignore custom notes after ^
-        target_name = target_name[:target_name.index("^")]
+	if "^" in target_name: # Rule 9, ignore custom notes after ^
+		target_name = target_name[:target_name.index("^")]
 
 	target_prefix = target_name.split("_")[0]
 	target_suffix = target_name.replace(target_prefix,'')
@@ -104,12 +187,12 @@ def check_target_compliance(target_name,tg_names=[]):
 	# then need to remove it and analyse rest of structure as before
 
 	if target_suffix != '':
-        # rule #5
-        split_suffix = target_suffix[1:].split("_")[0]
-        print("target", target_suffix)
-        print("split",split_suffix)
-        if target_suffix[0] == "_" and split_suffix in tg_names:
-            target_suffix = target_suffix[1:].replace(split_suffix,'')
+		# rule #5
+		split_suffix = target_suffix[1:].split("_")[0]
+		print("target", target_suffix)
+		print("split",split_suffix)
+		if target_suffix[0] == "_" and split_suffix in tg_names:
+			target_suffix = target_suffix[1:].replace(split_suffix,'')
 
 		# rule #6
 	

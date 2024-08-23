@@ -8,7 +8,7 @@ import csv
 # import re
 
 from parse_DICOM_RS import load_RS_names, find_RS_files_recursive
-from compliance_check import check_name_TG, check_target_compliance
+from compliance_check import check_TG_name, check_target_compliance, get_proposed_name
 from parse_xml_template import load_xml_data, parse_structure_xml
 
 start_time = time.time()
@@ -237,9 +237,11 @@ for i in range(len(rs_files)):
 
 			else:
 				if struct_type == "non-target":
-					
-					proposed_name, reason = check_name_TG(name,tg_names)
-					match = False
+					match, reason = check_TG_name(name, tg_names)
+					if not match:
+						proposed_name, reason = get_proposed_name(name,tg_names)
+
+					# match = False
 				else:
 					match, reason = check_target_compliance(name, tg_names)
 					
