@@ -9,7 +9,7 @@ import csv
 
 from parse_DICOM_RS import load_RS_names, find_RS_files_recursive
 from compliance_check import check_name_TG, check_target_compliance
-from parse_xml_template import load_xml_data
+from parse_xml_template import load_xml_data, parse_structure_xml
 
 start_time = time.time()
 
@@ -160,7 +160,7 @@ path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
 
 rs_files, new_names = load_RS_data(path)
 
-path = '/mnt/iDriveShare/Kayla/test_xmls/'
+path = '/mnt/iDriveShare/Kayla/StructureTemplates/'
 rs_files, new_names = load_xml_data(path)
 
 check_file = True
@@ -168,11 +168,25 @@ write_files = False
 print(rs_files, new_names)
 print("done calling load rs data")
 
+xml_ids, xml_types, temp_apps, temp_sites, last_approvals, names, vol_types, codes = [],[],[],[],[],[],[],[]
+
 for i in range(len(rs_files)):
 	print(i)
+	#TODO: messy calling multiple times
+	temp_id, temp_type, temp_app, temp_site, last_approval, ids, namex, vol_type, code =parse_structure_xml(path+rs_files[i])
+
 	for j in range(len(new_names[i])):
+		print(j)
 		
 		col_file.append(rs_files[i].replace(path,""))
+		xml_ids.append(temp_id)
+		xml_types.append(temp_type)
+		temp_apps.append(temp_app)
+		temp_sites.append(temp_site)
+		last_approvals.append(last_approval) 
+		names.append(namex[j]) 
+		vol_types.append(vol_type[j])
+		codes.append(code[j])
 
 		name = new_names[i][j]
 
@@ -275,12 +289,25 @@ for i in range(len(rs_files)):
 # 		writer = csv.writer(f)
 # 		writer.writerows(zip(col_file, col_name,col_match,col_propname,col_reason))
 
+
+# TO DO make it a fn for headers and vars , for now hard coding
+'''
 with open("full_list_structs.csv","w") as f:
 	writer = csv.writer(f)
 	writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
 	writer.writerows(zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
 
 with open("unique_list_structs.csv","w") as f:
+	writer = csv.writer(f)
+	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
+	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type,uniq_rules))
+'''
+with open("full_list_structs_xml.csv","w") as f:
+	writer = csv.writer(f)
+	writer.writerow(["File","type","ApprovalStatus","Site","lastApproval","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
+	writer.writerows(zip(col_file,xml_types,temp_apps,temp_sites,last_approvals,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
+
+with open("unique_list_structs_xml.csv","w") as f:
 	writer = csv.writer(f)
 	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
 	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type,uniq_rules))

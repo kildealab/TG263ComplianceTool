@@ -57,6 +57,7 @@ def parse_structure_xml(path):
 	root = extract_root(path)
 	temp_id, temp_type, temp_app, temp_site, last_approval = get_preview_elements(root)
 	ids, names, vol_type, codes = get_structure_elements(root)
+	# print(len(o))
 	return temp_id, temp_type, temp_app, temp_site, last_approval, ids, names, vol_type, codes
 
 
