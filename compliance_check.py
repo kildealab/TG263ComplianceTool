@@ -22,7 +22,7 @@ def check_name_TG(name,tg_names):
 
 
 
-def check_target_compliance(target_name):
+def check_target_compliance(target_name,tg_names=[]):
 	debug = False
 	reason = ''
 	#first check if there are spaces, then it's automatically not tg 263 compliant
@@ -99,9 +99,18 @@ def check_target_compliance(target_name):
 	# TO DO: SKIPPING RULES 4 AND 5 FOR NOW
 	# for rule 5, check thorugh TG again, however will need to do starts with i believe to accoutn for extra dose etc put at end
 	# then need to remove it and analyse rest of structure as before
-	# rule #6
-	
+
 	if target_suffix != '':
+        # rule #5
+        split_suffix = target_suffix[1:].split("_")[0]
+        print("target", target_suffix)
+        print("split",split_suffix)
+        if target_suffix[0] == "_" and split_suffix in tg_names:
+            target_suffix = target_suffix[1:].replace(split_suffix,'')
+
+		# rule #6
+	
+
 		relative_dose_suffixes = ["_High", "_Mid","_Low"]
 		if debug:
 			print("suffix", target_suffix)

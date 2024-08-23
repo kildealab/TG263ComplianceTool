@@ -240,7 +240,7 @@ for i in range(len(rs_files)):
 					proposed_name, reason = check_name_TG(name,tg_names)
 					match = False
 				else:
-					match, reason = check_target_compliance(name)
+					match, reason = check_target_compliance(name, tg_names)
 					
 				
 				col_match.append(match)
@@ -304,8 +304,8 @@ with open("unique_list_structs.csv","w") as f:
 '''
 with open("full_list_structs_xml.csv","w") as f:
 	writer = csv.writer(f)
-	writer.writerow(["File","type","ApprovalStatus","Site","lastApproval","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
-	writer.writerows(zip(col_file,xml_types,temp_apps,temp_sites,last_approvals,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
+	writer.writerow(["File","ID","type","ApprovalStatus","Site","lastApproval","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
+	writer.writerows(zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_approvals,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
 
 with open("unique_list_structs_xml.csv","w") as f:
 	writer = csv.writer(f)
