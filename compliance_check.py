@@ -2,11 +2,32 @@ import re
 import string
 
 
+common_mispellings = {
+    'brachialplexus': 'brachialplex',
+    'brstem': 'brainstem',
+    'left':'L',
+    'right':'R',
+    'opticnerve':'opticnrv',
+    'optnerv':'opticnrv',
+    'optnrv':'opticnrv',
+    'submandibular': 'submand',
+    'submandibula':'submand',
+    'submndsalv':'submand',
+    'surgbed':'surgicalbed',
+    'templobe':'temporallobe'
+    
+    
+    
+}
 
 def get_proposed_name(name,tg_names):
     name_nosymbols = re.sub(r'[0-9]','',re.sub(r'[^\w]', '', name).lower()).replace(" ","").replace("_","")
     print(name_nosymbols)
-
+    if any(substring in name_nosymbols for substring in common_mispellings.keys()):
+        for key in common_mispellings.keys():
+            if key in name_nosymbols:
+                name_nosymbols = name_nosymbols.replace(key,common_mispellings[key])
+                name = name.replace(key,common_mispellings[key])
     tg_names.sort(key=len, reverse=False)
     for tg_name in tg_names:
         # to do: inefficient, do this one time only for removeing symbols
