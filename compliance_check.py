@@ -1,25 +1,53 @@
 import re
 import string
 
+
+
 def get_proposed_name(name,tg_names):
+    name_nosymbols = re.sub(r'[0-9]','',re.sub(r'[^\w]', '', name).lower()).replace(" ","").replace("_","")
+    print(name_nosymbols)
 
-	for tg_name in tg_names:
-		if name.lower() == tg_name.lower():
-			return tg_name, "casing"
-		elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) == re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
-			if "~" in name:
-				if name.endswith("~") or name.endswith("~_R") or name.endswith("~_L"):
-					return tg_name,"SB OK"
-				return tg_name, "CHECK ~"
-			return tg_name, "symbols"
-		elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) in re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
-			return tg_name, ""
-		elif re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')) == re.sub(r'[^\w]', '', name.lower().replace(' ','')):
-			return tg_name, ""
+    tg_names.sort(key=len, reverse=False)
+    for tg_name in tg_names:
+        # to do: inefficient, do this one time only for removeing symbols
+        tg_name_nosymbols = re.sub(r'[0-9]','',re.sub(r'[^\w]', '', tg_name).lower()).replace("_","")
+    #         print(tg_name_nosymbols)
+    #         print()
 
 
-		# add suggestions for common mispellings, common mistakes, adding ^ in front of garbage, etc
-	return '',''
+        if name.lower() == tg_name.lower():
+            return tg_name, "casing"
+        elif name.lower().replace(" ", "") == tg_name.lower():
+            # print()
+            return tg_name, "spaces"
+
+        elif (tg_name_nosymbols == name_nosymbols):
+            return tg_name, "symbols"
+
+        elif name_nosymbols.replace(" ","") in tg_name_nosymbols:
+            return tg_name, "Missing part of name?"
+        else:
+            split_name = name.lower().split("_")
+            split_name.reverse()
+            if split_name == tg_name.lower().split("_"):
+                return tg_name, "Wrong order of words"
+        
+#         elif name.lower().split("_").reverse() == tg_name.lower().split("_"):
+#             return tg_name, "Wrong order of words"
+        '''
+        elif tg_name_nosymbols in name_nosymbols.replace(" ",""):
+            return tg_name, "too many letters in name??"
+        '''
+
+        '''
+        elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) in re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
+            return tg_name, ""
+        elif re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')) == re.sub(r'[^\w]', '', name.lower().replace(' ','')):
+            return tg_name, ""
+        '''
+
+        # add suggestions for common mispellings, common mistakes, adding ^ in front of garbage, etc
+    return '',''
 
 
 def check_TG_name(name, tg_names):
@@ -47,7 +75,7 @@ def check_TG_name(name, tg_names):
 # 			reason = "fails rule 1"
 # 			return False, reason
 		tg_start = False
-		tg_names.sort(key=len, reverse=True)
+		tg_names.sort(key=len, reverse=True) # sort longest to shortest so to avoid picking brain before brainstem
 		for n in tg_names: 
 			if 'PRV' in n:
 				n = n.replace('_PRVxx','').replace("_PRVx",'').replace('_PRV','')
@@ -122,9 +150,9 @@ def check_target_compliance(target_name,tg_names=[]):
 		reason = "> 16 characters"
 		return False, reason
 
-    if target_name[0] == "z":
-        reason = "Ignore after z"
-        return True, reason 
+	if target_name[0] == "z":
+		reason = "Ignore after z"
+		return True, reason 
 	
 	if "^" in target_name: # Rule 9, ignore custom notes after ^
 		target_name = target_name[:target_name.index("^")]
@@ -163,61 +191,61 @@ def check_target_compliance(target_name,tg_names=[]):
 	
 	
    
-    if target_prefix != '':
+	if target_prefix != '':
 #         if target_prefix[0] == "^": # rule 9
 #             if debug:
 #                 print("its true, all after ^")
 #             return True, reason
-        
-        # need to check rule 8 again, since could show up in prefix if no _
-        
-        if target_prefix[0].isalpha():
-            compliant = False
-            for c in list_allowed_classifiers:
-                if target_prefix.startswith(c):
-                    compliant = True
-                    target_prefix = target_prefix.replace(c,'')
-                    break
-            if not compliant:
-                reason = "Fails rule 2"
-                return False, reason
-        if debug:
-            print("After rule 2:",target_prefix)
-            
-        '''
-        prefix_no_digits = target_prefix.rstrip(string.digits)
-        if debug:
-            print("prefix no digits:",prefix_no_digits)
-        if not prefix_no_digits in list_allowed_classifiers: #rule 2
-            reason = "Fails rule 2"
-            return False, reason
-        
-        
-        for c in list_allowed_classifiers:
-            if target_prefix.startswith(c):
-                target_prefix = target_prefix.replace(c,'')
-                break
-        if debug:
-            print("After rule 2:",target_prefix)
-        '''
-        
-        if target_prefix != '':
-            if target_prefix[0].isdigit():
-                #ok this is if there is a digit
-                target_prefix = target_prefix[1:]
-            
-            if len(target_prefix) != 0 and not bool(re.match( r'^-\d{2}$',target_prefix)):
-                reason = "Fails rule 3?"
-                return False, reason
-        
-        '''
-        if target_prefix != '' and (len(target_prefix) > 1 or not target_prefix.isdigit()):
-            # rule #3 --> could be tricky, saying len sb max 1 becuase i doubt the bunbers would go up to 10
-            #but... there could be a random number there that isn't meant to represnet spatially distinct targets.
-            reason = "fails rule 3"
-            return False, reason
-        '''
-            
+		
+		# need to check rule 8 again, since could show up in prefix if no _
+		
+		if target_prefix[0].isalpha():
+			compliant = False
+			for c in list_allowed_classifiers:
+				if target_prefix.startswith(c):
+					compliant = True
+					target_prefix = target_prefix.replace(c,'')
+					break
+			if not compliant:
+				reason = "Fails rule 2"
+				return False, reason
+		if debug:
+			print("After rule 2:",target_prefix)
+			
+		'''
+		prefix_no_digits = target_prefix.rstrip(string.digits)
+		if debug:
+			print("prefix no digits:",prefix_no_digits)
+		if not prefix_no_digits in list_allowed_classifiers: #rule 2
+			reason = "Fails rule 2"
+			return False, reason
+		
+		
+		for c in list_allowed_classifiers:
+			if target_prefix.startswith(c):
+				target_prefix = target_prefix.replace(c,'')
+				break
+		if debug:
+			print("After rule 2:",target_prefix)
+		'''
+		
+		if target_prefix != '':
+			if target_prefix[0].isdigit():
+				#ok this is if there is a digit
+				target_prefix = target_prefix[1:]
+			
+			if len(target_prefix) != 0 and not bool(re.match( r'^-\d{2}$',target_prefix)):
+				reason = "Fails rule 3?"
+				return False, reason
+		
+		'''
+		if target_prefix != '' and (len(target_prefix) > 1 or not target_prefix.isdigit()):
+			# rule #3 --> could be tricky, saying len sb max 1 becuase i doubt the bunbers would go up to 10
+			#but... there could be a random number there that isn't meant to represnet spatially distinct targets.
+			reason = "fails rule 3"
+			return False, reason
+		'''
+			
 			
 	# TO DO -- check if ends with -xx for prefix eg CTVp2-05
 	
