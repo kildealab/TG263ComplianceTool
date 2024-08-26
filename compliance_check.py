@@ -4,12 +4,15 @@ import string
 
 common_mispellings = {
     'brachialplexus': 'brachialplex',
+    'brachiaplex':'brachialplex',
     'brstem': 'brainstem',
+    'greatvessels': 'greatves'
     'left':'L',
     'right':'R',
     'opticnerve':'opticnrv',
     'optnerv':'opticnrv',
     'optnrv':'opticnrv',
+    'spine':'spinal',
     'submandibular': 'submand',
     'submandibula':'submand',
     'submndsalv':'submand',
@@ -19,6 +22,7 @@ common_mispellings = {
     
     
 }
+
 
 def get_proposed_name(name,tg_names):
     name_nosymbols = re.sub(r'[0-9]','',re.sub(r'[^\w]', '', name).lower()).replace(" ","").replace("_","")
@@ -43,15 +47,48 @@ def get_proposed_name(name,tg_names):
             return tg_name, "spaces"
 
         elif (tg_name_nosymbols == name_nosymbols):
+            if 'prv' in tg_name_nosymbols:
+                two_num = True
+                
+                if bool(re.search(r'PRV\d{2}', name)):
+                    insert_index = tg_name.find('PRV') + len(tg_name) - 1
+                    digits_to_insert = re.search(r'PRV\d{2}', name).group(0)[-2:]
+                    
+                    if len(tg_name) < 15:
+                        new_string = tg_name[0:insert_index] + digits_to_insert + tg_name[insert_index:]
+                        return new_string, "error with symbols or casing" 
+                    elif len(tg_name) ==15:
+                        new_string = tg_name[0:insert_index] + digits_to_insert[-1] + tg_name[insert_index:]
+                        return new_string, "error with PRV numbers" 
+                
+                elif bool(re.search(r'PRV\d{1}', name)):
+                    insert_index = tg_name.find('PRV') + len(tg_name) - 1
+                    digits_to_insert = re.search(r'PRV\d{1}', name).group(0)[-1]
+                     
+                    
+                    if len(tg_name) < 15:
+                        new_string = tg_name[0:insert_index] + "0"+digits_to_insert + tg_name[insert_index:]
+                        return new_string, "error with PRV numbers" 
+                    elif len(tg_name) ==15:
+                        new_string = tg_name[0:insert_index] + digits_to_insert + tg_name[insert_index:]
+                        return new_string, "error with symbols or casing" 
+                        
+                    
             return tg_name, "symbols"
-
+        
         elif name_nosymbols.replace(" ","") in tg_name_nosymbols:
             return tg_name, "Missing part of name?"
         else:
             split_name = name.lower().split("_")
             split_name.reverse()
+            tg_name_rev = ''
+            for t in reversed(tg_name.lower().split("_")):
+                tg_name_rev = tg_name_rev + t
+                
             if split_name == tg_name.lower().split("_"):
                 return tg_name, "Wrong order of words"
+            elif tg_name_rev == name.lower():
+                return tg_name, "Wrong ordering of words and missing _"
         
 #         elif name.lower().split("_").reverse() == tg_name.lower().split("_"):
 #             return tg_name, "Wrong order of words"
@@ -69,7 +106,6 @@ def get_proposed_name(name,tg_names):
 
         # add suggestions for common mispellings, common mistakes, adding ^ in front of garbage, etc
     return '',''
-
 
 def check_TG_name(name, tg_names):
 	original_length = len(name)
