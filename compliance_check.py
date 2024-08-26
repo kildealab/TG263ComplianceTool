@@ -47,8 +47,13 @@ def check_TG_name(name, tg_names):
 # 			reason = "fails rule 1"
 # 			return False, reason
 		tg_start = False
+		tg_names.sort(key=len, reverse=True)
 		for n in tg_names: 
+			if 'PRV' in n:
+				n = n.replace('_PRVxx','').replace("_PRVx",'').replace('_PRV','')
 			if name.startswith(n):
+# 				if len(name) > len(n) and name[len(n)].isalpha():
+# 					continue
 				tg_start = True
 				name = name.replace(n,'')
 				break
@@ -116,6 +121,10 @@ def check_target_compliance(target_name,tg_names=[]):
 	if len(target_name) > 16:
 		reason = "> 16 characters"
 		return False, reason
+
+    if target_name[0] == "z":
+        reason = "Ignore after z"
+        return True, reason 
 	
 	if "^" in target_name: # Rule 9, ignore custom notes after ^
 		target_name = target_name[:target_name.index("^")]
@@ -153,30 +162,62 @@ def check_target_compliance(target_name,tg_names=[]):
 	
 	
 	
-	if target_prefix != '':
-		# if target_prefix[0] == "^": # rule 9
-		# 	if debug:
-		# 		print("its true, all after ^")
-		# 	return True, reason
-		prefix_no_digits = target_prefix.rstrip(string.digits)
-		if debug:
-			print("prefix no digits:",prefix_no_digits)
-		if not prefix_no_digits in list_allowed_classifiers: #rule 2
-			reason = "Fails rule 2"
-			return False, reason
-		
-		for c in list_allowed_classifiers:
-			if target_prefix.startswith(c):
-				target_prefix = target_prefix.replace(c,'')
-				break
-		if debug:
-			print("After rule 2:",target_prefix)
-		
-		if target_prefix != '' and (len(target_prefix) > 1 or not target_prefix.isdigit()):
-			# rule #3 --> could be tricky, saying len sb max 1 becuase i doubt the bunbers would go up to 10
-			#but... there could be a random number there that isn't meant to represnet spatially distinct targets.
-			reason = "fails rule 3"
-			return False, reason
+   
+    if target_prefix != '':
+#         if target_prefix[0] == "^": # rule 9
+#             if debug:
+#                 print("its true, all after ^")
+#             return True, reason
+        
+        # need to check rule 8 again, since could show up in prefix if no _
+        
+        if target_prefix[0].isalpha():
+            compliant = False
+            for c in list_allowed_classifiers:
+                if target_prefix.startswith(c):
+                    compliant = True
+                    target_prefix = target_prefix.replace(c,'')
+                    break
+            if not compliant:
+                reason = "Fails rule 2"
+                return False, reason
+        if debug:
+            print("After rule 2:",target_prefix)
+            
+        '''
+        prefix_no_digits = target_prefix.rstrip(string.digits)
+        if debug:
+            print("prefix no digits:",prefix_no_digits)
+        if not prefix_no_digits in list_allowed_classifiers: #rule 2
+            reason = "Fails rule 2"
+            return False, reason
+        
+        
+        for c in list_allowed_classifiers:
+            if target_prefix.startswith(c):
+                target_prefix = target_prefix.replace(c,'')
+                break
+        if debug:
+            print("After rule 2:",target_prefix)
+        '''
+        
+        if target_prefix != '':
+            if target_prefix[0].isdigit():
+                #ok this is if there is a digit
+                target_prefix = target_prefix[1:]
+            
+            if len(target_prefix) != 0 and not bool(re.match( r'^-\d{2}$',target_prefix)):
+                reason = "Fails rule 3?"
+                return False, reason
+        
+        '''
+        if target_prefix != '' and (len(target_prefix) > 1 or not target_prefix.isdigit()):
+            # rule #3 --> could be tricky, saying len sb max 1 becuase i doubt the bunbers would go up to 10
+            #but... there could be a random number there that isn't meant to represnet spatially distinct targets.
+            reason = "fails rule 3"
+            return False, reason
+        '''
+            
 			
 	# TO DO -- check if ends with -xx for prefix eg CTVp2-05
 	
