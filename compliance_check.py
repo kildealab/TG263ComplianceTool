@@ -3,109 +3,144 @@ import string
 
 
 common_mispellings = {
-    'brachialplexus': 'brachialplex',
-    'brachiaplex':'brachialplex',
-    'brstem': 'brainstem',
-    'greatvessels': 'greatves'
-    'left':'L',
-    'right':'R',
-    'opticnerve':'opticnrv',
-    'optnerv':'opticnrv',
-    'optnrv':'opticnrv',
-    'spine':'spinal',
-    'submandibular': 'submand',
-    'submandibula':'submand',
-    'submndsalv':'submand',
-    'surgbed':'surgicalbed',
-    'templobe':'temporallobe'
-    
-    
-    
+	'brachialplexus': 'brachialplex',
+	'brachiaplex':'brachialplex',
+	'brstem': 'brainstem',
+	'greatvessels': 'greatves',
+	'left':'L',
+	'right':'R',
+	'opticnerve':'opticnrv',
+	'optnerv':'opticnrv',
+	'optnrv':'opticnrv',
+	'spine':'spinal',
+	'submandibular': 'submand',
+	'submandibula':'submand',
+	'submndsalv':'submand',
+	'surgbed':'surgicalbed',
+	'templobe':'temporallobe'
+	
+	
+	
 }
+
+additional_allowed_names = []
 
 
 def get_proposed_name(name,tg_names):
-    name_nosymbols = re.sub(r'[0-9]','',re.sub(r'[^\w]', '', name).lower()).replace(" ","").replace("_","")
-    print(name_nosymbols)
-    if any(substring in name_nosymbols for substring in common_mispellings.keys()):
-        for key in common_mispellings.keys():
-            if key in name_nosymbols:
-                name_nosymbols = name_nosymbols.replace(key,common_mispellings[key])
-                name = name.replace(key,common_mispellings[key])
-    tg_names.sort(key=len, reverse=False)
-    for tg_name in tg_names:
-        # to do: inefficient, do this one time only for removeing symbols
-        tg_name_nosymbols = re.sub(r'[0-9]','',re.sub(r'[^\w]', '', tg_name).lower()).replace("_","")
-    #         print(tg_name_nosymbols)
-    #         print()
+	
+	if (name[0] == 'z' or name[0] == "_") and ' ' in name and len(name)<= 16:
+		return name.replace(" ","_"), "spaces"
+	
+
+		
+	name_nosymbols = re.sub(r'[0-9]','',re.sub(r'[^\w]', '', name).lower()).replace(" ","").replace("_","")
+	# print(name_nosymbols)
+	tg_names = tg_names + additional_allowed_names
+	if any(substring in name_nosymbols for substring in common_mispellings.keys()):
+		for key in common_mispellings.keys():
+			if key in name_nosymbols:
+				name_nosymbols = name_nosymbols.replace(key,common_mispellings[key])
+				name = name.replace(key,common_mispellings[key])
+
+	tg_names.sort(key=len, reverse=False)
+	for tg_name in tg_names:
+		# to do: inefficient, do this one time only for removeing symbols
+		tg_name_nosymbols = re.sub(r'[0-9]','',re.sub(r'[^\w]', '', tg_name).lower()).replace("_","")
+	#         print(tg_name_nosymbols)
+	#         print()
 
 
-        if name.lower() == tg_name.lower():
-            return tg_name, "casing"
-        elif name.lower().replace(" ", "") == tg_name.lower():
-            # print()
-            return tg_name, "spaces"
+		if name.lower() == tg_name.lower():
+			return tg_name, "casing"
+		elif name.lower().replace(" ", "") == tg_name.lower():
+			# print()
+			return tg_name, "spaces"
 
-        elif (tg_name_nosymbols == name_nosymbols):
-            if 'prv' in tg_name_nosymbols:
-                two_num = True
-                
-                if bool(re.search(r'PRV\d{2}', name)):
-                    insert_index = tg_name.find('PRV') + len(tg_name) - 1
-                    digits_to_insert = re.search(r'PRV\d{2}', name).group(0)[-2:]
-                    
-                    if len(tg_name) < 15:
-                        new_string = tg_name[0:insert_index] + digits_to_insert + tg_name[insert_index:]
-                        return new_string, "error with symbols or casing" 
-                    elif len(tg_name) ==15:
-                        new_string = tg_name[0:insert_index] + digits_to_insert[-1] + tg_name[insert_index:]
-                        return new_string, "error with PRV numbers" 
-                
-                elif bool(re.search(r'PRV\d{1}', name)):
-                    insert_index = tg_name.find('PRV') + len(tg_name) - 1
-                    digits_to_insert = re.search(r'PRV\d{1}', name).group(0)[-1]
-                     
-                    
-                    if len(tg_name) < 15:
-                        new_string = tg_name[0:insert_index] + "0"+digits_to_insert + tg_name[insert_index:]
-                        return new_string, "error with PRV numbers" 
-                    elif len(tg_name) ==15:
-                        new_string = tg_name[0:insert_index] + digits_to_insert + tg_name[insert_index:]
-                        return new_string, "error with symbols or casing" 
-                        
-                    
-            return tg_name, "symbols"
-        
-        elif name_nosymbols.replace(" ","") in tg_name_nosymbols:
-            return tg_name, "Missing part of name?"
-        else:
-            split_name = name.lower().split("_")
-            split_name.reverse()
-            tg_name_rev = ''
-            for t in reversed(tg_name.lower().split("_")):
-                tg_name_rev = tg_name_rev + t
-                
-            if split_name == tg_name.lower().split("_"):
-                return tg_name, "Wrong order of words"
-            elif tg_name_rev == name.lower():
-                return tg_name, "Wrong ordering of words and missing _"
-        
+		elif (tg_name_nosymbols == name_nosymbols):
+			if 'prv' in tg_name_nosymbols:
+				two_num = True
+				
+				if bool(re.search(r'PRV\d{2}', name)):
+					insert_index = tg_name.find('PRV') + len('PRV') 
+					print(tg_name.find('PRV'))
+					digits_to_insert = re.search(r'PRV\d{2}', name).group(0)[-2:]
+					print(insert_index)
+					if len(tg_name) < 15:
+						new_string = tg_name[0:insert_index] + digits_to_insert + tg_name[insert_index:]
+						
+						return new_string, "error with symbols or casing" 
+					elif len(tg_name) ==15:
+						new_string = tg_name[0:insert_index] + digits_to_insert[-1] + tg_name[insert_index:]
+						return new_string, "error with PRV numbers" 
+				
+				elif bool(re.search(r'PRV\d{1}', name)):
+					insert_index = tg_name.find('PRV') + len('PRV') 
+					print("insert_index")
+					digits_to_insert = re.search(r'PRV\d{1}', name).group(0)[-1]
+					 
+					
+					if len(tg_name) < 15:
+						new_string = tg_name[0:insert_index] + "0"+digits_to_insert + tg_name[insert_index:]
+						return new_string, "error with PRV numbers" 
+					elif len(tg_name) ==15:
+						new_string = tg_name[0:insert_index] + digits_to_insert + tg_name[insert_index:]
+						return new_string, "error with symbols or casing" 
+						
+					
+			return tg_name, "symbols"
+
+		elif name_nosymbols.replace(" ","") in tg_name_nosymbols:
+			return tg_name, "Missing part of name?"
+		else:
+			split_name = name.lower().split("_")
+			split_name.reverse()
+			tg_name_rev = ''
+			split_tg = tg_name.lower().split("_")
+#             print(len(split_tg))
+			
+			if len(split_tg)>1:
+				for t in reversed(split_tg):
+					tg_name_rev = tg_name_rev + t
+  
+
+				if tg_name_rev[0] == "r" or tg_name_rev[0]=='l':
+					
+					tg_name_rev = tg_name_rev[1:] +tg_name_rev[0]
+					if 'temporal' in tg_name.lower():
+							print(tg_name_rev)
+
+			if split_name == tg_name.lower().split("_"):
+				return tg_name, "Wrong order of words"
+			elif tg_name_rev == name_nosymbols.lower():
+				return tg_name, "Wrong ordering of words and missing _"
+		
 #         elif name.lower().split("_").reverse() == tg_name.lower().split("_"):
 #             return tg_name, "Wrong order of words"
-        '''
-        elif tg_name_nosymbols in name_nosymbols.replace(" ",""):
-            return tg_name, "too many letters in name??"
-        '''
+		'''
+		elif tg_name_nosymbols in name_nosymbols.replace(" ",""):
+			return tg_name, "too many letters in name??"
+		'''
 
-        '''
-        elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) in re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
-            return tg_name, ""
-        elif re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')) == re.sub(r'[^\w]', '', name.lower().replace(' ','')):
-            return tg_name, ""
-        '''
+		'''
+		elif re.sub(r'[^\w]', '', name.lower().replace(' ','')) in re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')):
+			return tg_name, ""
+		elif re.sub(r'[^\w]', '', tg_name.lower().replace(' ','')) == re.sub(r'[^\w]', '', name.lower().replace(' ','')):
+			return tg_name, ""
+		'''
 
-        # add suggestions for common mispellings, common mistakes, adding ^ in front of garbage, etc
-    return '',''
+		# add suggestions for common mispellings, common mistakes, adding ^ in front of garbage, etc
+		
+		if ('avoid' in name.lower() or 'nos' in name.lower() or 'ring' in name.lower() or ('opt' in name.lower() and 'optic' not in name.lower()) ):  #what to do with opt? since optic nerve
+			if len(name) == 15:
+				return "z"+name.replace(" ","_"), "consider adding z in front if not used for dose eval"
+			elif len(name) < 15:
+				return "z_"+name.replace(" ","_"), "consider adding z in front if not used for dose eval"
+			else:
+				return "", "need to start with z but name too long"
+			
+			
+			
+	return '',''
 
 def check_TG_name(name, tg_names):
 	original_length = len(name)
@@ -121,6 +156,9 @@ def check_TG_name(name, tg_names):
 	
 	if "^" in name: # Rule 12, ignore custom notes after ^
 		name = name[:name.index("^")]
+
+	if name in additional_allowed_names:
+		return True, ''
 
 	if name != '':
 		#rule #14 (asssuming doesnt matter after z?)
@@ -185,6 +223,7 @@ def check_TG_name(name, tg_names):
 
 	if name == '' or name[0] == "^": # can prob remove this now
 #             print("ALL GOODDDDDD")
+		additional_allowed_names.append(name)
 		return True, reason
 	else:
 #             print("FAILED~!", target_suffix)
@@ -224,8 +263,10 @@ def check_target_compliance(target_name,tg_names=[]):
 #     print("suffix", target_suffix)
 
 	is_correct = True
-	reasoning = ''
-  
+	# reasoning = ''
+	
+	if target_name in additional_allowed_names:
+		return True, reason
 
 	# CHECKING PREFIX
 	list_allowed_prefixes = ['PTV!','GTV','CTV','ITV','IGTV','ICTV','PTV'] #rule 1
@@ -365,6 +406,7 @@ def check_target_compliance(target_name,tg_names=[]):
 		# rule 9
 	if target_suffix == '' or target_suffix[0] == "^":
 #             print("ALL GOODDDDDD")
+		additional_allowed_names.append(target_name)
 		return True, reason
 	else:
 #             print("FAILED~!", target_suffix)
