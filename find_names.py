@@ -105,18 +105,19 @@ instances=[]
 
 # path =
 
+file_type = 'dcm'
 path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
 
 # path = '/mnt/iDriveShare/Kayla/CBCT_images/Kayla_extracted/'
 
-# rs_files, new_names = load_RS_data(path)
+rs_files, new_names = load_RS_data(path)
 
-path = '/mnt/iDriveShare/Kayla/StructureTemplates/'
-rs_files, new_names = load_xml_data(path)
+# path = '/mnt/iDriveShare/Kayla/StructureTemplates/'
+# rs_files, new_names = load_xml_data(path)
 
 # path = '/mnt/iDriveShare/Kayla/EclipseStructureTemplates/'
-path = './'
-rs_files, new_names = load_xml_data(path)
+# path = './'
+# rs_files, new_names = load_xml_data(path)
 print(rs_files)
 
 check_file = True
@@ -131,26 +132,28 @@ names_to_convert_proposal = []
 for i in range(len(rs_files)):
 	# print(i)
 	#TODO: messy calling multiple times
-	temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action, ids, namex, vol_type, code =parse_structure_xml(path+rs_files[i])
+	if file_type == 'xml':
+		temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action, ids, namex, vol_type, code =parse_structure_xml(path+rs_files[i])
 
 	for j in range(len(new_names[i])):
 		# print(j)
 		
 		col_file.append(rs_files[i].replace(path,""))
-		xml_ids.append(temp_id)
-		xml_types.append(temp_type)
-		temp_apps.append(temp_app)
-		temp_sites.append(temp_site)
-		# last_approvals.append(last_approval) 
-		last_names.append(last_name)
-		last_dates.append(last_date)
-		last_actions.append(last_action)
-		created_names.append(created_name)
-		created_dates.append(created_date)
-		created_actions.append(created_action)
-		names.append(namex[j]) 
-		vol_types.append(vol_type[j])
-		codes.append(code[j])
+		if file_type == 'xml':
+			xml_ids.append(temp_id)
+			xml_types.append(temp_type)
+			temp_apps.append(temp_app)
+			temp_sites.append(temp_site)
+			# last_approvals.append(last_approval) 
+			last_names.append(last_name)
+			last_dates.append(last_date)
+			last_actions.append(last_action)
+			created_names.append(created_name)
+			created_dates.append(created_date)
+			created_actions.append(created_action)
+			names.append(namex[j]) 
+			vol_types.append(vol_type[j])
+			codes.append(code[j])
 
 		name = new_names[i][j]
 
@@ -263,7 +266,7 @@ for i in range(len(rs_files)):
 
 
 # TO DO make it a fn for headers and vars , for now hard coding
-'''
+
 with open("full_list_structs.csv","w") as f:
 	writer = csv.writer(f)
 	writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
@@ -283,7 +286,7 @@ with open("unique_list_structs_xml.csv","w")  as f:
 	writer = csv.writer(f)
 	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
 	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type,uniq_rules))
-
+'''
 with open("names_to_convert.csv","w") as f:
 	writer = csv.writer(f)
 	writer.writerow(["In-House Name","Proposed Name"])
