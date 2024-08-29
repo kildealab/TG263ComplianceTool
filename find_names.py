@@ -82,55 +82,6 @@ print(rt_names)
 tg_names, tg_names_rev = load_tg_263()
 print(len(tg_names))
 print(len(tg_names_rev))
-'''
-names_to_convert = []
-
-# note: ~ used to denote partial structures, e.g. Brain~, Lung~_L
-temp_struct_avoid = []#['nos','~','z_']
-for name in rt_names:
-	if not any(keyword in name for keyword in temp_struct_avoid):
-		if name in tg_names:
-			k = 1
-			# print("YES:",name)
-		else:
-			# print("NO",name)
-			names_to_convert.append(name)
-
-print(len(names_to_convert))
-
-
-proposed_names = []
-# TO DO : fix this weird loop/if mess
-
-for name in names_to_convert:
-	found = False
-	# print(name)
-	for tg_name in tg_names:
-		if not found and name.lower() == tg_name.lower():
-			proposed_names.append(tg_name)
-			found = True
-			# print(tg_name)
-		elif not found and name.lower() in tg_name.lower():
-			proposed_names.append(tg_name)
-			found = True
-			# print(tg_name)
-		elif not found and tg_name.lower() in name.lower():
-			proposed_names.append(tg_name)
-			found = True
-			# print(tg_name)
-		# 
-	if not found:
-		proposed_names.append('')
-		# print(tg_name)
-
-print(proposed_names)
-
-print(len(names_to_convert))
-
-print(len(proposed_names))
-'''
-
-			
 
 
 col_file = []
@@ -158,10 +109,15 @@ path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
 
 # path = '/mnt/iDriveShare/Kayla/CBCT_images/Kayla_extracted/'
 
-rs_files, new_names = load_RS_data(path)
+# rs_files, new_names = load_RS_data(path)
 
 path = '/mnt/iDriveShare/Kayla/StructureTemplates/'
 rs_files, new_names = load_xml_data(path)
+
+# path = '/mnt/iDriveShare/Kayla/EclipseStructureTemplates/'
+path = './'
+rs_files, new_names = load_xml_data(path)
+print(rs_files)
 
 check_file = True
 write_files = False
@@ -169,6 +125,8 @@ write_files = False
 print("done calling load rs data")
 
 xml_ids, xml_types, temp_apps, temp_sites, last_names,last_dates,last_actions,created_names,created_dates,created_actions, names, vol_types, codes = [],[],[],[],[],[],[],[],[],[],[],[],[]
+names_to_convert = []
+names_to_convert_proposal = []
 
 for i in range(len(rs_files)):
 	# print(i)
@@ -279,12 +237,17 @@ for i in range(len(rs_files)):
 						rules.append(5)
 				col_rules.append(rules)
 
+				if not match and name not in names_to_convert:
+					names_to_convert.append(name)
+					names_to_convert_proposal.append(proposed_name)
+
 			
 			uniq_match.append(match)
 			uniq_propname.append(proposed_name)
 			uniq_reason.append(reason)
 			uniq_type.append(struct_type)
 			uniq_rules.append(rules)
+
 
 
 # overwrite = True
@@ -316,10 +279,15 @@ with open("full_list_structs_xml.csv","w") as f:
 	writer.writerow(["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
 	writer.writerows(zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
 
-with open("unique_list_structs_xml.csv","w") as f:
+with open("unique_list_structs_xml.csv","w")  as f:
 	writer = csv.writer(f)
 	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
 	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type,uniq_rules))
+
+with open("names_to_convert.csv","w") as f:
+	writer = csv.writer(f)
+	writer.writerow(["In-House Name","Proposed Name"])
+	writer.writerows(zip(names_to_convert,names_to_convert_proposal))
 
 # to do , dont overwrite if exists
 with open("additional_allowed_names.csv", "w") as f:
@@ -327,7 +295,9 @@ with open("additional_allowed_names.csv", "w") as f:
 
 	writer.writerows(zip(sorted(get_additional_names())))
 
+print("Compliance rate:", uniq_match.count(True),"/",len(uniq_match), "-->", round(100*uniq_match.count(True)/len(uniq_match),2),"%")
 print("*********", time.time() - start_time,  "*********")
+
 
 
 # # data_to_write = [[x] for x in names_to_convert]

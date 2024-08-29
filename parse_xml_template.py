@@ -4,7 +4,7 @@ import os
 def extract_root(path):
 	tree = ET.parse(path)
 	root = tree.getroot()
-	return root
+	return root, tree
 
 def get_preview_elements(root):
 	for it in root.iter('Preview'): # TO DO can customize to get whatever ids with config file -- or just do get fns for each 
@@ -16,7 +16,7 @@ def get_preview_elements(root):
 		approval_history = it.get("ApprovalHistory").split(";")
 		last_approval = approval_history[-1]
 		created = approval_history[0]
-		print(last_approval)
+		# print(last_approval)
 		last_name = last_approval.split(' ')[0]
 		last_date = last_approval.split('[ ')[-1].strip(' ]')
 		last_action =last_approval.split(' ')[1]
@@ -70,7 +70,7 @@ def get_structure_elements(root):
 
 
 def parse_structure_xml(path):
-	root = extract_root(path)
+	root,_ = extract_root(path)
 	temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action = get_preview_elements(root)
 	ids, names, vol_type, codes = get_structure_elements(root)
 	# print(len(o))
@@ -95,6 +95,27 @@ def load_xml_data(PATH):
 		names.append(name)
 
 	return xml_files, names
+
+def rename_xml_template(name_dict,PATH, save_path):
+	files, names = load_xml_data(PATH)
+	for file in files:
+		root, tree = extract_root(PATH+file)
+		for structure in root.findall('.//Structure'):
+			structure_id = structure.get("ID")
+			if structure_id in name_dict:
+				if name_dict[structure_id] =='':
+					print("WARNING: NO REPLACEMENT FOR NAME ", structure_id)
+				else:
+					# print("replacing",structure_id, name_dict['structure_id'])
+					structure.attrib['ID'] = name_dict[structure_id]
+		tree.write(save_path+"NEW_"+file)
+
+
+
+
+
+
+
 
 
 # path = '/mnt/iDriveShare/Kayla/StructureTemplates/StructureTemplate_27718.xml'
