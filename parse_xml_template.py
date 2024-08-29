@@ -13,9 +13,25 @@ def get_preview_elements(root):
 		temp_type = it.get('Type')
 		temp_app = it.get("ApprovalStatus")
 		temp_site = it.get("TreatmentSite")
-		last_approval = it.get("ApprovalHistory").split(";")[-1]
+		approval_history = it.get("ApprovalHistory").split(";")
+		last_approval = approval_history[-1]
+		created = approval_history[0]
+		print(last_approval)
+		last_name = last_approval.split(' ')[0]
+		last_date = last_approval.split('[ ')[-1].strip(' ]')
+		last_action =last_approval.split(' ')[1]
 
-	return temp_id, temp_type, temp_app, temp_site, last_approval
+		created_name = created.split(' ')[0]
+		created_date = created.split('[ ')[-1].strip(' ]')
+		created_action =created.split(' ')[1]
+
+
+		# if last_approval == created:
+			# last_approval = ''
+
+
+
+	return temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action
 
 
 def get_structure_elements(root):
@@ -55,10 +71,10 @@ def get_structure_elements(root):
 
 def parse_structure_xml(path):
 	root = extract_root(path)
-	temp_id, temp_type, temp_app, temp_site, last_approval = get_preview_elements(root)
+	temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action = get_preview_elements(root)
 	ids, names, vol_type, codes = get_structure_elements(root)
 	# print(len(o))
-	return temp_id, temp_type, temp_app, temp_site, last_approval, ids, names, vol_type, codes
+	return temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action, ids, names, vol_type, codes
 
 
 
@@ -75,7 +91,7 @@ def load_xml_data(PATH):
 			xml_files.append(file)
 
 	for file in xml_files:
-		_, _,_,_,_,name,_,_,_ = parse_structure_xml(PATH+file)
+		_, _,_,_,_,_, _,_,_,_,name,_,_,_ = parse_structure_xml(PATH+file)
 		names.append(name)
 
 	return xml_files, names

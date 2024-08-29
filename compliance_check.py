@@ -1,6 +1,7 @@
 import re
 import string
-
+from thefuzz import process
+import os
 
 common_mispellings = {
 	'brachialplexus': 'brachialplex',
@@ -26,12 +27,12 @@ common_mispellings = {
 additional_allowed_names = []
 
 
-def get_proposed_name(name,tg_names):
+def get_proposed_name(name,tg_names,use_fuzzy = True):
 	
 	if (name[0] == 'z' or name[0] == "_") and ' ' in name and len(name)<= 16:
 		return name.replace(" ","_"), "spaces"
 	
-
+	# print("Added names:" , additional_allowed_names)
 		
 	name_nosymbols = re.sub(r'[0-9]','',re.sub(r'[^\w]', '', name).lower()).replace(" ","").replace("_","")
 	# print(name_nosymbols)
@@ -51,7 +52,9 @@ def get_proposed_name(name,tg_names):
 
 
 		if name.lower() == tg_name.lower():
+			print("casing")
 			return tg_name, "casing"
+
 		elif name.lower().replace(" ", "") == tg_name.lower():
 			# print()
 			return tg_name, "spaces"
@@ -62,9 +65,9 @@ def get_proposed_name(name,tg_names):
 				
 				if bool(re.search(r'PRV\d{2}', name)):
 					insert_index = tg_name.find('PRV') + len('PRV') 
-					print(tg_name.find('PRV'))
+					# print(tg_name.find('PRV'))
 					digits_to_insert = re.search(r'PRV\d{2}', name).group(0)[-2:]
-					print(insert_index)
+					# print(insert_index)
 					if len(tg_name) < 15:
 						new_string = tg_name[0:insert_index] + digits_to_insert + tg_name[insert_index:]
 						
@@ -75,9 +78,9 @@ def get_proposed_name(name,tg_names):
 				
 				elif bool(re.search(r'PRV\d{1}', name)):
 					insert_index = tg_name.find('PRV') + len('PRV') 
-					print("insert_index")
+					# print("insert_index")
 					digits_to_insert = re.search(r'PRV\d{1}', name).group(0)[-1]
-					 
+					
 					
 					if len(tg_name) < 15:
 						new_string = tg_name[0:insert_index] + "0"+digits_to_insert + tg_name[insert_index:]
@@ -138,12 +141,19 @@ def get_proposed_name(name,tg_names):
 			else:
 				return "", "need to start with z but name too long"
 			
-			
-			
+	
+	if use_fuzzy:
+		# print("in fuz")
+		closest_match = process.extractOne(name, tg_names)
+
+
+		return closest_match[0], 'using fuzzy'
+
 	return '',''
 
 def check_TG_name(name, tg_names):
 	original_length = len(name)
+	original_name = name
 	reason = ''
 
 	if ' ' in name:
@@ -223,7 +233,8 @@ def check_TG_name(name, tg_names):
 
 	if name == '' or name[0] == "^": # can prob remove this now
 #             print("ALL GOODDDDDD")
-		additional_allowed_names.append(name)
+		if original_name not in additional_allowed_names and original_name not in tg_names:
+			additional_allowed_names.append(original_name)
 		return True, reason
 	else:
 #             print("FAILED~!", target_suffix)
@@ -356,8 +367,8 @@ def check_target_compliance(target_name,tg_names=[]):
 	if target_suffix != '':
 		# rule #5
 		split_suffix = target_suffix[1:].split("_")[0]
-		print("target", target_suffix)
-		print("split",split_suffix)
+		# print("target", target_suffix)
+		# print("split",split_suffix)
 		if target_suffix[0] == "_" and split_suffix in tg_names:
 			target_suffix = target_suffix[1:].replace(split_suffix,'')
 
@@ -406,9 +417,19 @@ def check_target_compliance(target_name,tg_names=[]):
 		# rule 9
 	if target_suffix == '' or target_suffix[0] == "^":
 #             print("ALL GOODDDDDD")
-		additional_allowed_names.append(target_name)
+		if target_name not in additional_allowed_names:
+			additional_allowed_names.append(target_name)
 		return True, reason
 	else:
 #             print("FAILED~!", target_suffix)
 		reason = "Suffix leftover: " + target_suffix
 		return False, reason
+
+def get_additional_names():
+	return additional_allowed_names
+
+def load_additional_names(file_name="additional_allowed_names.csv"):
+	global additional_allowed_names
+	if os.path.isfile(file_name):
+		with open(file_name, 'r') as fil:
+			additional_allowed_names = [line.rstrip('\n') for line in fil]

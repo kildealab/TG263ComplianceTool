@@ -8,13 +8,13 @@ import csv
 # import re
 
 from parse_DICOM_RS import load_RS_names, find_RS_files_recursive
-from compliance_check import check_TG_name, check_target_compliance, get_proposed_name
+from compliance_check import check_TG_name, check_target_compliance, get_proposed_name,get_additional_names,load_additional_names
 from parse_xml_template import load_xml_data, parse_structure_xml
 
 start_time = time.time()
 
 
-
+load_additional_names()
 
 def load_csv(csv_path="."):
 	csv_file = os.path.join(csv_path,"name_conversions.csv")
@@ -130,7 +130,7 @@ print(len(names_to_convert))
 print(len(proposed_names))
 '''
 
-            
+			
 
 
 col_file = []
@@ -165,25 +165,31 @@ rs_files, new_names = load_xml_data(path)
 
 check_file = True
 write_files = False
-print(rs_files, new_names)
+# print(rs_files, new_names)
 print("done calling load rs data")
 
-xml_ids, xml_types, temp_apps, temp_sites, last_approvals, names, vol_types, codes = [],[],[],[],[],[],[],[]
+xml_ids, xml_types, temp_apps, temp_sites, last_names,last_dates,last_actions,created_names,created_dates,created_actions, names, vol_types, codes = [],[],[],[],[],[],[],[],[],[],[],[],[]
 
 for i in range(len(rs_files)):
-	print(i)
+	# print(i)
 	#TODO: messy calling multiple times
-	temp_id, temp_type, temp_app, temp_site, last_approval, ids, namex, vol_type, code =parse_structure_xml(path+rs_files[i])
+	temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action, ids, namex, vol_type, code =parse_structure_xml(path+rs_files[i])
 
 	for j in range(len(new_names[i])):
-		print(j)
+		# print(j)
 		
 		col_file.append(rs_files[i].replace(path,""))
 		xml_ids.append(temp_id)
 		xml_types.append(temp_type)
 		temp_apps.append(temp_app)
 		temp_sites.append(temp_site)
-		last_approvals.append(last_approval) 
+		# last_approvals.append(last_approval) 
+		last_names.append(last_name)
+		last_dates.append(last_date)
+		last_actions.append(last_action)
+		created_names.append(created_name)
+		created_dates.append(created_date)
+		created_actions.append(created_action)
 		names.append(namex[j]) 
 		vol_types.append(vol_type[j])
 		codes.append(code[j])
@@ -307,16 +313,19 @@ with open("unique_list_structs.csv","w") as f:
 '''
 with open("full_list_structs_xml.csv","w") as f:
 	writer = csv.writer(f)
-	writer.writerow(["File","ID","type","ApprovalStatus","Site","lastApproval","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
-	writer.writerows(zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_approvals,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
+	writer.writerow(["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
+	writer.writerows(zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
 
 with open("unique_list_structs_xml.csv","w") as f:
 	writer = csv.writer(f)
 	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
 	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type,uniq_rules))
 
+# to do , dont overwrite if exists
+with open("additional_allowed_names.csv", "w") as f:
+	writer = csv.writer(f)
 
-
+	writer.writerows(zip(sorted(get_additional_names())))
 
 print("*********", time.time() - start_time,  "*********")
 
