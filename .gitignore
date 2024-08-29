@@ -1,5 +1,4 @@
-names_to_convert.csv
-unique_list_structs.csv
-full_list_structs.csv
-
-
+__pycache__
+.ipynb_checkpoints
+*.csv
+*.xml
