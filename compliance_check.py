@@ -29,6 +29,8 @@ additional_allowed_names = []
 
 def get_proposed_name(name,tg_names,use_fuzzy = True):
 	
+	if (name[0] == 'Z' and len(name) <= 16):
+		return 'z' + name[1:], "Capital Z should be z"
 	if (name[0] == 'z' or name[0] == "_") and ' ' in name and len(name)<= 16:
 		return name.replace(" ","_"), "spaces"
 	
@@ -229,6 +231,7 @@ def check_TG_name(name, tg_names):
 				name = name[2:]
 
 
+			roi_name = seq.ROIName
 
 
 	if name == '' or name[0] == "^": # can prob remove this now
