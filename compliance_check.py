@@ -231,7 +231,7 @@ def check_TG_name(name, tg_names):
 				name = name[2:]
 
 
-			roi_name = seq.ROIName
+			# roi_name = seq.ROIName
 
 
 	if name == '' or name[0] == "^": # can prob remove this now

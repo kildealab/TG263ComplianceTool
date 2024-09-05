@@ -14,13 +14,22 @@ from parse_DICOM_RS import rename_dicom_rt
 
 # temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action, ids, namex, vol_type, code =parse_structure_xml(path+rs_files[i])
 
-with open(path_to_conversion) as csv_file:
-	reader = csv.reader(csv_file)
-	name_dict = dict(reader)
-	print(name_dict)
 
 # print(name_dict['Brachial_Plex_R'])
-# rename_xml_template(name_dict,path_original_files,save_path)
+
+def main():
+	with open(path_to_conversion) as csv_file:
+		reader = csv.reader(csv_file)
+		name_dict = dict(reader)
+		# print(name_dict)
+
+	# TO DO -- xml or dicom based on type
+	# rename_xml_template(name_dict,path_original_files,save_path)
 
 
-rename_dicom_rt(name_dict, path_original_files_dcm, save_path)
+	rename_dicom_rt(name_dict, path_original_files_dcm, save_path)
+
+
+
+if __name__ == '__main__':
+	main()
