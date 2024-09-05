@@ -6,8 +6,8 @@ path_original_files_dcm = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/618
 save_path = './'
 save_path_dcm = './NEW_dicoms/'
 
-from parse_xml_template import rename_xml_template
-from parse_DICOM_RS import rename_dicom_rt
+from .parse_xml_template import rename_xml_template
+from .parse_DICOM_RS import rename_dicom_rt
 
 
 # rs_files, new_names = load_xml_data(path)

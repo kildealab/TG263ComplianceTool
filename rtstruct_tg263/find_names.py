@@ -7,9 +7,9 @@ import pandas as pd
 import csv
 # import re
 
-from parse_DICOM_RS import load_RS_names, find_RS_files_recursive
-from compliance_check import check_TG_name, check_target_compliance, get_proposed_name,get_additional_names,load_additional_names
-from parse_xml_template import load_xml_data, parse_structure_xml
+from .parse_DICOM_RS import load_RS_names, find_RS_files_recursive
+from .compliance_check import check_TG_name, check_target_compliance, get_proposed_name,get_additional_names,load_additional_names
+from .parse_xml_template import load_xml_data, parse_structure_xml
 
 
 def load_csv(csv_path="."):

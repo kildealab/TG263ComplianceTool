@@ -1,4 +1,4 @@
-from setuptools import setuptools
+from setuptools import setup, find_packages
 
 # add readme/requirements
 
@@ -8,11 +8,11 @@ setup(
 	author_email="kayla.osullivan-steben@mcgill.mail.ca",
 	version='0.1',
 	# description='TO DO: add description',
-	# packages=['TO DO: add dependences'],
+	packages=find_packages(),
 	entry_points = {
 		'console_scripts': [
-			'find-names=.find_names:main',
-			'rename-structures=rename_structures:main'
+			'find-names=rtstruct_tg263.find_names:main',
+			'rename-structures=rtstruct_tg263.rename_structures:main'
 		]
 	}
 )
