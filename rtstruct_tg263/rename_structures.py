@@ -1,6 +1,6 @@
 import csv
 
-path_to_conversion = './names_to_convert.csv'
+# path_to_conversion = './names_to_convert.csv'
 path_original_files = '/mnt/iDriveShare/Kayla/EclipseStructureTemplates/'
 path_original_files_dcm = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/618_old/20230529_CT_25_MAY_2023/'
 save_path = './'
@@ -17,12 +17,17 @@ from .parse_DICOM_RS import rename_dicom_rt
 
 # print(name_dict['Brachial_Plex_R'])
 
-def main():
+def get_name_dict(path_to_conversion='./names_to_convert.csv'):
 	with open(path_to_conversion) as csv_file:
 		reader = csv.reader(csv_file)
 		name_dict = dict(reader)
 		# print(name_dict)
+	return name_dict
 
+
+def main():
+	
+	name_dict = get_name_dict()
 	# TO DO -- xml or dicom based on type
 	# rename_xml_template(name_dict,path_original_files,save_path)
 
