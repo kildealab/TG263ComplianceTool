@@ -7,12 +7,18 @@ import pandas as pd
 import csv
 # import re
 
-from .parse_DICOM_RS import load_RS_names, find_RS_files_recursive
-from .compliance_check import check_TG_name, check_target_compliance, get_proposed_name,get_additional_names,load_additional_names
-from .parse_xml_template import load_xml_data, parse_structure_xml
+from parse_DICOM_RS import load_RS_names, find_RS_files_recursive
+from compliance_check import check_TG_name, check_target_compliance, get_proposed_name,get_additional_names,load_additional_names
+from parse_xml_template import load_xml_data, parse_structure_xml
 
 
 def load_csv(csv_path="."):
+	'''
+	load_csv	
+
+	:param csv_path:
+	:return:
+	'''
 	csv_file = os.path.join(csv_path,"name_conversions.csv")
 	if os.path.isfile(csv_file):
 		df = pd.read_csv(csv_file)
@@ -22,21 +28,41 @@ def load_csv(csv_path="."):
 	else:
 		return []
 
-def load_tg_263(tg_path=".",tg_name="./data/TG263_Nomenclature_Worksheet_20170815(TG263 v20170815).csv"):
+def load_tg_263(tg_path="../data/",tg_name="TG263_Nomenclature_Worksheet_20170815(TG263 v20170815).csv"):
+	'''
+	load_tg_263	Reads the TG263 csv file obtained from https://www.aapm.org/pubs/reports/RPT_263_Supplemental/
+				Note: Should keep this updated if ever there are changes, or link directly to the live spreadsheet.	
+
+	:param tg_path: Path to where the TG 263 spreadhseet is located.
+	:param tg_name: Name of the TG 263 csv. 
+	:return: the list of allowed names, and the list of allowed names in the reversed nomenclature.
+	'''
+
 	df = pd.read_csv(os.path.join(tg_path,tg_name))
 	tg_names = df['TG263-Primary Name'].to_list()
 	tg_names_rev = df['TG-263-Reverse Order Name'].to_list()
 	return tg_names, tg_names_rev
 
 
-def load_RS_data(path,check_file = False, write_files = False):
+def load_RS_data(path,check_file = False, write_files = False,avoid_root_keywords=[]):
+	'''
+	load_RS_data	Recursively searches for all DICOM Structure Set Files (assumes file name starts with 'RS') 
+					within a given path.
 
+	:param path: Path to search recursively for RS riles.
+	:param check_file: @todo
+	:param write_files: @todo
+	:param avoid_root_keywords: List of keywords found in directory names to ignore during search.
+
+	:return: a list of RS file paths, and a list of the structure names in these files
+
+	'''
 
 	if check_file and os.path.isfile('names_to_convert.csv'):
 		with open('names_to_convert.csv','r') as f:
 			rs_files = [row[0] for row in csv.reader(f)]
 	else:
-		rs_files = find_RS_files_recursive(path)#,avoid_root_keywords=["_CBCT_","PlanAdapt","QA","old","TEST"])
+		rs_files = find_RS_files_recursive(path,avoid_root_keywords)#,avoid_root_keywords=["_CBCT_","PlanAdapt","QA","old","TEST"])
 		data_to_write = [[x] for x in rs_files]
 		if write_files:
 			with open("names_to_convert.csv","w") as f:
@@ -74,10 +100,17 @@ def main():
 
 	start_time = time.time()
 
-	load_additional_names()
+	# Load the official TG 263 CSV containing list of allowed names
+	tg_names, tg_names_rev = load_tg_263()
+	print(len(tg_names))
+	print(len(tg_names_rev))
 
-	path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
-	# path = '/mnt/iDriveShare/Kayla/CBCT_images/Kayla_extracted/'
+
+	# Loads the CSV with additional nomenclatures that are TG 263 compliant, but not explicitly in the original CSV
+	# Names were automatically added after passing through the compliance check in this code. 
+	# This CSV is unecessary, but saves time for repeated words that have already been checked.
+	load_additional_names() 
+
 
 
 
@@ -97,10 +130,7 @@ def main():
 
 	print(rt_names)
 	'''
-	tg_names, tg_names_rev = load_tg_263()
-	print(len(tg_names))
-	print(len(tg_names_rev))
-
+	
 
 	col_file = []
 	col_name = []
@@ -121,13 +151,15 @@ def main():
 	instances=[]
 	# TO DO # fix this -- right now just makine rs_files the template files
 
-	# path =
-
+	
+	# to do, automatic or command line param
 	file_type = 'dcm'
+	
+	# TODO: put path in config file
 	path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
-
 	# path = '/mnt/iDriveShare/Kayla/CBCT_images/Kayla_extracted/'
 
+	# Get the list of DICOM RS files and the structure names in them
 	rs_files, new_names = load_RS_data(path)
 
 	# path = '/mnt/iDriveShare/Kayla/StructureTemplates/'
@@ -138,11 +170,15 @@ def main():
 	# rs_files, new_names = load_xml_data(path)
 	print(rs_files)
 
+	# @todo: why is this here
+
 	check_file = True
 	write_files = False
 	# print(rs_files, new_names)
 	print("done calling load rs data")
 
+
+	# TO DO: complete disaster why are there so many params lol
 	xml_ids, xml_types, temp_apps, temp_sites, last_names,last_dates,last_actions,created_names,created_dates,created_actions, names, vol_types, codes = [],[],[],[],[],[],[],[],[],[],[],[],[]
 	names_to_convert = []
 	names_to_convert_proposal = []
@@ -210,7 +246,7 @@ def main():
 				col_type.append(struct_type)
 
 
-				if name in tg_names:
+				if name in tg_names: # Check if name in TG list 
 					match = True
 					col_match.append("True")
 					col_propname.append("")
@@ -228,7 +264,7 @@ def main():
 
 						# match = False
 					else:
-						match, reason = check_target_compliance(name, tg_names)
+						match, reason = check_target_compliance(name, tg_names) # Check target name compliance
 						
 					
 					col_match.append(match)
@@ -249,7 +285,7 @@ def main():
 					if struct_type == "target":
 						rules.append("TBD")
 					else:
-						if len(name) > 16:
+						if len(name) > 16: 
 							rules.append(1)
 						#to do: rules 2, 3, etc.
 						if reason=="casing":

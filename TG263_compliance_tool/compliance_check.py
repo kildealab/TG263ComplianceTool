@@ -27,7 +27,7 @@ common_mispellings = {
 additional_allowed_names = []
 
 
-def get_proposed_name(name,tg_names,use_fuzzy = True):
+def get_proposed_name(name,tg_names,use_fuzzy = False):
 	
 	if (name[0] == 'Z' and len(name) <= 16):
 		return 'z' + name[1:], "Capital Z should be z"
@@ -249,17 +249,24 @@ def check_TG_name(name, tg_names):
 
 
 def check_target_compliance(target_name,tg_names=[]):
+	'''
+	check_target_compliance	XXXXX The code works by going through each part of the target name and removing the parts 
+							that comply from beginning to end of word. This means the code can go through the rules one
+							at a time to check for compliance. TODOL add link to paper, section 8.2
+	'''
 	debug = False
 	reason = ''
-	#first check if there are spaces, then it's automatically not tg 263 compliant
+	#first check if there are spaces, then it's automatically not TG 263 compliant
 	if ' ' in target_name:
 		reason = "spaces"
 		return False, reason
 
+	# Names must be max 16 characters
 	if len(target_name) > 16:
 		reason = "> 16 characters"
 		return False, reason
 
+	# Structures starting with 'z' are not used for dose evaluation and are thus ignored 
 	if target_name[0] == "z":
 		reason = "Ignore after z"
 		return True, reason 
@@ -267,6 +274,7 @@ def check_target_compliance(target_name,tg_names=[]):
 	if "^" in target_name: # Rule 9, ignore custom notes after ^
 		target_name = target_name[:target_name.index("^")]
 
+	# Split the name up: everything preceding the first '_' is called the prefix, everything following is the suffix
 	target_prefix = target_name.split("_")[0]
 	target_suffix = target_name.replace(target_prefix,'')
 	
@@ -283,17 +291,19 @@ def check_target_compliance(target_name,tg_names=[]):
 		return True, reason
 
 	# CHECKING PREFIX
-	list_allowed_prefixes = ['PTV!','GTV','CTV','ITV','IGTV','ICTV','PTV'] #rule 1
-	list_allowed_classifiers = ['n', 'p', 'sb', 'par', 'v', 'vas',''] # rule 2, including none
-	#note: ordering of the above mattes, PTV! sb before PTV, and '' should be last -- this is for when removing it from prefix
+	list_allowed_prefixes = ['PTV!','GTV','CTV','ITV','IGTV','ICTV','PTV'] # Rule 1
+	list_allowed_classifiers = ['n', 'p', 'sb', 'par', 'v', 'vas',''] # Rule 2 - target classifiers allowed, including none
+	#note: ordering of the above matters, PTV! sb before PTV, and '' should be last -- this is for when removing it from prefix
 	
-	if not target_prefix.startswith(tuple(list_allowed_prefixes)): # rule 1
-		reason = "fails rule 1"
+	if not target_prefix.startswith(tuple(list_allowed_prefixes)): # Rule 1: name does not start with an allowed prefix
+		reason = "Fails rule 1"
 		return False, reason
 	
+	# If compliant with Rule 1, removes allowed prefix from word
+	# Eg: if a name starts with GTVp, at this point the GTV will be removed and the remaining character(s) ('p') will be checked next.
 	for p in list_allowed_prefixes: 
 		if target_prefix.startswith(p):
-			target_prefix = target_prefix.replace(p,'')
+			target_prefix = target_prefix.replace(p,'') # remove compliant characters for rule 1
 			break
    
 	if debug:
@@ -302,7 +312,7 @@ def check_target_compliance(target_name,tg_names=[]):
 	
 	
 	
-   
+   	# If the prefix still contains characters after removing start letters, check if compliant. 
 	if target_prefix != '':
 #         if target_prefix[0] == "^": # rule 9
 #             if debug:
@@ -311,12 +321,13 @@ def check_target_compliance(target_name,tg_names=[]):
 		
 		# need to check rule 8 again, since could show up in prefix if no _
 		
+		# Check if remaining char(s) are an allowed classifier (Rule #2)
 		if target_prefix[0].isalpha():
 			compliant = False
 			for c in list_allowed_classifiers:
 				if target_prefix.startswith(c):
 					compliant = True
-					target_prefix = target_prefix.replace(c,'')
+					target_prefix = target_prefix.replace(c,'') # Remove compliant char(s) for rule 2
 					break
 			if not compliant:
 				reason = "Fails rule 2"
@@ -341,11 +352,12 @@ def check_target_compliance(target_name,tg_names=[]):
 			print("After rule 2:",target_prefix)
 		'''
 		
+		# Check remaining char(s) in prefix after removing rule 1 and 2
 		if target_prefix != '':
-			if target_prefix[0].isdigit():
-				#ok this is if there is a digit
-				target_prefix = target_prefix[1:]
+			if target_prefix[0].isdigit(): # If next character is a digit, it is compliant (rule 3)
+				target_prefix = target_prefix[1:] # Remove compliant digit
 			
+			# If there are still remaining char(s) and they do not match rule 8 (eg: ends with '-05' allowed), then fails compliance
 			if len(target_prefix) != 0 and not bool(re.match( r'^-\d{2}$',target_prefix)):
 				reason = "Fails rule 3?"
 				return False, reason
@@ -359,7 +371,7 @@ def check_target_compliance(target_name,tg_names=[]):
 		'''
 			
 			
-	# TO DO -- check if ends with -xx for prefix eg CTVp2-05
+	# TO DO -- check if ends with -xx for prefix eg CTVp2-05 ^^ this is achieved above
 	
 	# CHECKING SUFFIX
 	
@@ -367,7 +379,8 @@ def check_target_compliance(target_name,tg_names=[]):
 	# for rule 5, check thorugh TG again, however will need to do starts with i believe to accoutn for extra dose etc put at end
 	# then need to remove it and analyse rest of structure as before
 
-	if target_suffix != '':
+
+	if target_suffix != '': # If there were character(s) after '_' in the original target name, check their compliance
 		# rule #5
 		split_suffix = target_suffix[1:].split("_")[0]
 		# print("target", target_suffix)
