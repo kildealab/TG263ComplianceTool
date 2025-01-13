@@ -28,7 +28,7 @@ additional_allowed_names = []
 
 
 def get_proposed_name(name,tg_names,use_fuzzy = False):
-	
+	reason = ""
 	if (name[0] == 'Z' and len(name) <= 16):
 		return 'z' + name[1:], "Capital Z should be z"
 	if (name[0] == 'z' or name[0] == "_") and ' ' in name and len(name)<= 16:
@@ -44,6 +44,7 @@ def get_proposed_name(name,tg_names,use_fuzzy = False):
 			if key in name_nosymbols:
 				name_nosymbols = name_nosymbols.replace(key,common_mispellings[key])
 				name = name.replace(key,common_mispellings[key])
+				reason = "common mispelling of TG term"
 
 	tg_names.sort(key=len, reverse=False)
 	for tg_name in tg_names:
@@ -92,7 +93,7 @@ def get_proposed_name(name,tg_names,use_fuzzy = False):
 						return new_string, "error with symbols or casing" 
 						
 					
-			return tg_name, "symbols"
+			return tg_name, reason
 
 		elif name_nosymbols.replace(" ","") in tg_name_nosymbols:
 			return tg_name, "Missing part of name?"
@@ -296,7 +297,7 @@ def check_target_compliance(target_name,tg_names=[]):
 	#note: ordering of the above matters, PTV! sb before PTV, and '' should be last -- this is for when removing it from prefix
 	
 	if not target_prefix.startswith(tuple(list_allowed_prefixes)): # Rule 1: name does not start with an allowed prefix
-		reason = "Fails rule 1"
+		reason = "Fails rule 1 for target structures"
 		return False, reason
 	
 	# If compliant with Rule 1, removes allowed prefix from word
@@ -330,7 +331,7 @@ def check_target_compliance(target_name,tg_names=[]):
 					target_prefix = target_prefix.replace(c,'') # Remove compliant char(s) for rule 2
 					break
 			if not compliant:
-				reason = "Fails rule 2"
+				reason = "Fails rule 2 for target structures"
 				return False, reason
 		if debug:
 			print("After rule 2:",target_prefix)
@@ -359,7 +360,7 @@ def check_target_compliance(target_name,tg_names=[]):
 			
 			# If there are still remaining char(s) and they do not match rule 8 (eg: ends with '-05' allowed), then fails compliance
 			if len(target_prefix) != 0 and not bool(re.match( r'^-\d{2}$',target_prefix)):
-				reason = "Fails rule 3?"
+				reason = "Non-compliant characters after prefix (target rules 1-3). _ or ^ might be needed."
 				return False, reason
 		
 		'''
@@ -444,8 +445,3 @@ def check_target_compliance(target_name,tg_names=[]):
 def get_additional_names():
 	return additional_allowed_names
 
-def load_additional_names(file_name="additional_allowed_names.csv"):
-	global additional_allowed_names
-	if os.path.isfile(file_name):
-		with open(file_name, 'r') as fil:
-			additional_allowed_names = [line.rstrip('\n') for line in fil]

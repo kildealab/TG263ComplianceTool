@@ -35,11 +35,11 @@ def main():
 	start_time = time.time()
 
 	# to do, automatic or command line param
-	file_type = 'xml'
+	file_type = 'dcm'
 	
 	# TODO: put path in config file
-	# path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
-	path = '/mnt/iDriveShare/Kayla/StructureTemplates/'
+	path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
+	# path = '/mnt/iDriveShare/Kayla/StructureTemplates/'
 
 
 	# Load the official TG 263 CSV containing list of allowed names
@@ -78,8 +78,8 @@ def main():
 	print(rt_names)
 	'''
 	
-	col_file, col_name, col_length, col_match, col_propname, col_reason, col_type, col_rules = [], [], [], [], [], [], [], []
-	uniq_name, uniq_length, uniq_match, uniq_propname, uniq_reason, uniq_type, uniq_rules, instances = [], [], [], [], [], [], [], []
+	col_file, col_name, col_length, col_match, col_propname, col_reason, col_type = [], [], [], [], [], [], []
+	uniq_name, uniq_length, uniq_match, uniq_propname, uniq_reason, uniq_type, instances = [], [], [], [], [], [], []
 
 
 	# TO DO # fix this -- right now just makine rs_files the template files
@@ -142,7 +142,7 @@ def main():
 				col_propname.append(col_propname[index])
 				col_reason.append(col_reason[index])
 				col_type.append(col_type[index])
-				col_rules.append(col_rules[index])
+				# col_rules.append(col_rules[index])
 
 				uniq_index = uniq_name.index(name)
 				instances[uniq_index] += 1
@@ -172,10 +172,10 @@ def main():
 					col_match.append("True")
 					col_propname.append("")
 					col_reason.append("")
-					col_rules.append("")
+					# col_rules.append("")
 					proposed_name =""
 					reason = ""
-					rules = []
+					# rules = []
 
 				else:
 					if struct_type == "non-target":
@@ -189,31 +189,19 @@ def main():
 						
 					
 					col_match.append(match)
-					if reason == '':
-						if 'avoid' in name.lower():
-							reason = "avoid"
-						elif "z_" in name.lower():
-							reason = "z"
-						elif "nos" in name.lower():
-							reason = "nos"
-						# elif "TV" in name:
-						# 	reason = "PTV/CTV/GTV"
+					# if reason == '':
+					# 	if 'avoid' in name.lower():
+					# 		reason = "avoid"
+					# 	elif "z_" in name.lower():
+					# 		reason = "z"
+					# 	elif "nos" in name.lower():
+					# 		reason = "nos"
+					# 	# elif "TV" in name:
+					# 	# 	reason = "PTV/CTV/GTV"
 
 					col_propname.append(proposed_name)
 					col_reason.append(reason) 
 
-					rules = []
-					if struct_type == "target":
-						rules.append("TBD")
-					else:
-						if len(name) > 16: 
-							rules.append(1)
-						#to do: rules 2, 3, etc.
-						if reason=="casing":
-							rules.append(4)
-						if " " in name:
-							rules.append(5)
-					col_rules.append(rules)
 
 					if not match and name not in names_to_convert:
 						names_to_convert.append(name)
@@ -224,7 +212,7 @@ def main():
 				uniq_propname.append(proposed_name)
 				uniq_reason.append(reason)
 				uniq_type.append(struct_type)
-				uniq_rules.append(rules)
+				# uniq_rules.append(rules)
 
 
 
@@ -244,24 +232,24 @@ def main():
 	if file_type == 'dcm':
 		with open("full_list_structs.csv","w") as f:
 			writer = csv.writer(f)
-			writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
-			writer.writerows(zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
+			writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+			writer.writerows(zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type))
 
 		with open("unique_list_structs.csv","w") as f:
 			writer = csv.writer(f)
-			writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
-			writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type,uniq_rules))
+			writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+			writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type))
 		
 	if file_type == 'xml':
 		with open("full_list_structs_xml.csv","w") as f:
 			writer = csv.writer(f)
-			writer.writerow(["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
-			writer.writerows(zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type,col_rules))
+			writer.writerow(["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+			writer.writerows(zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type))
 
 		with open("unique_list_structs_xml.csv","w")  as f:
 			writer = csv.writer(f)
-			writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type","Rules"])
-			writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type,uniq_rules))
+			writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+			writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type))
 	
 	with open("names_to_convert.csv","w") as f:
 		writer = csv.writer(f)
