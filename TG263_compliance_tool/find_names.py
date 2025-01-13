@@ -13,7 +13,7 @@ import csv
 
 import loaders
 import compliance_check
-import parse_xml_template
+import parse_xml
 
 
 
@@ -228,12 +228,14 @@ def main():
 	# 		writer.writerows(zip(col_file, col_name,col_match,col_propname,col_reason))
 
 
+	detailed_output = False
 	# TO DO make it a fn for headers and vars , for now hard coding
 	if file_type == 'dcm':
-		with open("full_list_structs.csv","w") as f:
-			writer = csv.writer(f)
-			writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
-			writer.writerows(zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type))
+		if detailed_output:
+			with open("full_list_structs.csv","w") as f:
+				writer = csv.writer(f)
+				writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+				writer.writerows(zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type))
 
 		with open("unique_list_structs.csv","w") as f:
 			writer = csv.writer(f)

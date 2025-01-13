@@ -3,8 +3,8 @@ import csv
 import pandas as pd
 import csv
 
-import parse_DICOM_RS
-import parse_xml_template
+import parse_dcm
+import parse_xml
 
 def load_csv(csv_path="."):
 	'''
@@ -101,7 +101,7 @@ def load_RS_data(path,check_file = False, write_files = False,avoid_root_keyword
 	# json_data = load_json()
 	# print(json_data)
 
-	new_names = parse_DICOM_RS.load_RS_names(rs_files)
+	new_names = parse_dcm.load_RS_names(rs_files)
 	# print(new_names)
 
 	return rs_files, new_names
@@ -120,7 +120,7 @@ def load_xml_data(PATH):
 			xml_files.append(file)
 
 	for file in xml_files:
-		_, _,_,_,_,_, _,_,_,_,name,_,_,_ = parse_xml_template.parse_structure_xml(PATH+file)
+		_, _,_,_,_,_, _,_,_,_,name,_,_,_ = parse_xml.parse_structure_xml(PATH+file)
 		names.append(name)
 
 	return xml_files, names
