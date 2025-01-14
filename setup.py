@@ -11,8 +11,8 @@ setup(
 	packages=find_packages(),
 	entry_points = {
 		'console_scripts': [
-			'find-names=rtstruct_tg263.find_names:main',
-			'rename-structures=rtstruct_tg263.rename_structures:main'
+			'find-names=scripts.find_names:main',
+			'rename-structures=scripts.rename_structures:main'
 		]
 	}
 )

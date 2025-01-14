@@ -1,7 +1,6 @@
 import pydicom as dcm
 import os
 
-import loaders
 
 def find_ROI_names(RS, keyword='', avoid=[]):
 	'''
@@ -30,10 +29,10 @@ def load_RS_names(rs_files):
 		list_names.append(find_ROI_names(RS))
 	return list_names
 
-def rename_dicom_rt(name_dict,PATH, save_path):
+def rename_dicom_rt(name_dict,files, save_path):
 	#TO DO: go thru dicom names
 	#to do -- make efficient, save list?
-	files = loaders.find_RS_files_recursive(PATH,avoid_root_keywords=['kV_CBCT'])
+	
 	print(files)
 	for file in files:
 		RS = dcm.read_file(file)
@@ -51,5 +50,5 @@ def rename_dicom_rt(name_dict,PATH, save_path):
 
 		# TO DO: created path if not exists
 
-		RS.save_as(save_path+file.split("/")[-1])        
+		RS.save_as(os.path.join(save_path,file.split("/")[-1]))        
 

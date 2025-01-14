@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 import os
-import loaders
+
 
 def extract_root(path):
 	tree = ET.parse(path)
@@ -81,8 +81,8 @@ def parse_structure_xml(path):
 
 
 
-def rename_xml_template(name_dict,PATH, save_path):
-	files, names = loaders.load_xml_data(PATH)
+def rename_xml_template(name_dict,files,PATH, save_path):
+	
 	for file in files:
 		root, tree = extract_root(PATH+file)
 		for structure in root.findall('.//Structure'):
@@ -93,5 +93,5 @@ def rename_xml_template(name_dict,PATH, save_path):
 				else:
 					# print("replacing",structure_id, name_dict['structure_id'])
 					structure.attrib['ID'] = name_dict[structure_id]
-		tree.write(save_path+"NEW_"+file)
+		tree.write(os.path.join(save_path,"NEW_"+file))
 

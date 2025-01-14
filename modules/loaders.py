@@ -3,8 +3,9 @@ import csv
 import pandas as pd
 import csv
 
-import parse_dcm
-import parse_xml
+import modules.parse_dcm as parse_dcm
+import modules.parse_xml as parse_xml
+
 
 def load_csv(csv_path="."):
 	'''

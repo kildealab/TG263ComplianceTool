@@ -11,12 +11,10 @@ import csv
 # from compliance_check import check_TG_name, check_target_compliance, get_proposed_name,get_additional_names,load_additional_names
 # from parse_xml_template import load_xml_data, parse_structure_xml
 
-import loaders
-import compliance_check
-import parse_xml
+import modules.loaders as loaders
+import modules.compliance_check as compliance_check
+import modules.parse_xml as parse_xml
 from config import config
-
-
 
 
 
@@ -40,11 +38,12 @@ def main():
 	path = config['PATH']
 	file_type = config['file_type']
 	
+	fd = os.path.abspath(os.path.dirname(__file__)) # current file directory, for constructing relative paths later
 
-
+	
 
 	# Load the official TG 263 CSV containing list of allowed names
-	tg_names, tg_names_rev = loaders.load_tg_263()
+	tg_names, tg_names_rev = loaders.load_tg_263(tg_path=os.path.join(fd,"../data/"))
 
 
 
@@ -207,7 +206,7 @@ def main():
 					col_propname.append(proposed_name)
 					col_reason.append(reason) 
 
-					print(name,match,name in names_to_convert)
+					# print(name,match,name in names_to_convert)
 
 					if not match and name not in names_to_convert:
 						# print(name)
