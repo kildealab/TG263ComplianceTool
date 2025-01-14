@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import os
+import loaders
 
 def extract_root(path):
 	tree = ET.parse(path)
@@ -81,7 +82,7 @@ def parse_structure_xml(path):
 
 
 def rename_xml_template(name_dict,PATH, save_path):
-	files, names = load_xml_data(PATH)
+	files, names = loaders.load_xml_data(PATH)
 	for file in files:
 		root, tree = extract_root(PATH+file)
 		for structure in root.findall('.//Structure'):

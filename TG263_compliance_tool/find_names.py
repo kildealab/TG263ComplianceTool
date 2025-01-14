@@ -55,7 +55,7 @@ def main():
 
 	# Get the list of DICOM RS files and the structure names in them
 	if file_type == 'dcm':
-		rs_files, new_names = loaders.load_RS_data(path)
+		rs_files, new_names = loaders.load_RS_data(path,avoid_root_keywords=['kV_CBCT'])
 	elif file_type == 'xml':
 		rs_files, new_names = loaders.load_xml_data(path)
 	else:
@@ -210,8 +210,8 @@ def main():
 					print(name,match,name in names_to_convert)
 
 					if not match and name not in names_to_convert:
-						print(name)
-						print(names_to_convert)
+						# print(name)
+						# print(names_to_convert)
 						names_to_convert.append(name)
 						names_to_convert_proposal.append(proposed_name)
 						to_convert_reasons.append(reason)

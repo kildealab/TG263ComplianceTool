@@ -1,7 +1,8 @@
 import re
 import string
-from thefuzz import process
+# from thefuzz import process
 import os
+from loaders import find_RS_files_recursive
 
 common_mispellings = {
 	'brachialplexus': 'brachialplex',

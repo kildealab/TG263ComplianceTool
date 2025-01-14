@@ -1,7 +1,7 @@
 import pydicom as dcm
 import os
 
-
+import loaders
 
 def find_ROI_names(RS, keyword='', avoid=[]):
 	'''
@@ -33,7 +33,7 @@ def load_RS_names(rs_files):
 def rename_dicom_rt(name_dict,PATH, save_path):
 	#TO DO: go thru dicom names
 	#to do -- make efficient, save list?
-	files = find_RS_files_recursive(PATH)
+	files = loaders.find_RS_files_recursive(PATH,avoid_root_keywords=['kV_CBCT'])
 	print(files)
 	for file in files:
 		RS = dcm.read_file(file)
@@ -46,6 +46,7 @@ def rename_dicom_rt(name_dict,PATH, save_path):
 					print("WARNING: NO REPLACEMENT FOR NAME", roi_name)
 				else:
 					RS.StructureSetROISequence[i].ROIName = name_dict[roi_name]
+					print(seq)
 					
 
 		# TO DO: created path if not exists
