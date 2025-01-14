@@ -14,6 +14,7 @@ import csv
 import loaders
 import compliance_check
 import parse_xml
+from config import config
 
 
 
@@ -34,18 +35,17 @@ def main():
 
 	start_time = time.time()
 
-	# to do, automatic or command line param
-	file_type = 'dcm'
+	# to do, add command line option
+
+	path = config['PATH']
+	file_type = config['file_type']
 	
-	# TODO: put path in config file
-	path = '/mnt/iDriveShare/Kayla/CBCT_images/test_rt_struct/'
-	# path = '/mnt/iDriveShare/Kayla/StructureTemplates/'
+
 
 
 	# Load the official TG 263 CSV containing list of allowed names
 	tg_names, tg_names_rev = loaders.load_tg_263()
-	print(len(tg_names))
-	print(len(tg_names_rev))
+
 
 
 	# Loads the CSV with additional nomenclatures that are TG 263 compliant, but not explicitly in the original CSV
@@ -58,6 +58,8 @@ def main():
 		rs_files, new_names = loaders.load_RS_data(path)
 	elif file_type == 'xml':
 		rs_files, new_names = loaders.load_xml_data(path)
+	else:
+		raise Exception("Please specify one of the following file types: xml or dcm.")
 
 
 
@@ -90,8 +92,8 @@ def main():
 
 	# @todo: why is this here
 
-	check_file = True
-	write_files = False
+	# check_file = True
+	# write_files = False
 	# print(rs_files, new_names)
 	print("done calling load rs data")
 
@@ -108,7 +110,7 @@ def main():
 		# print(i)
 		#TODO: messy calling multiple times
 		if file_type == 'xml':
-			temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action, ids, namex, vol_type, code = parse_xml_template.parse_structure_xml(path+rs_files[i])
+			temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action, ids, namex, vol_type, code = parse_xml.parse_structure_xml(path+rs_files[i])
 
 		for j in range(len(new_names[i])):
 			# print(j)
@@ -159,6 +161,7 @@ def main():
 
 				col_length.append(len(name))
 
+				# Check if the structure is a target or non-target, as they have different rules
 				if "gtv" in name.lower() or "ctv" in name.lower() or "ptv" in name.lower() or "itv" in name.lower():
 					struct_type = "target"
 					
@@ -230,43 +233,62 @@ def main():
 
 	detailed_output = False
 	# TO DO make it a fn for headers and vars , for now hard coding
-	if file_type == 'dcm':
-		if detailed_output:
-			with open("full_list_structs.csv","w") as f:
-				writer = csv.writer(f)
-				writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
-				writer.writerows(zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type))
+	# if file_type == 'dcm':
+	# 	if detailed_output:
+	# 		with open("full_list_structs.csv","w") as f:
+	# 			writer = csv.writer(f)
+	# 			writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+	# 			writer.writerows(zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type))
 
-		with open("unique_list_structs.csv","w") as f:
-			writer = csv.writer(f)
-			writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
-			writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type))
+		# with open("unique_list_structs.csv","w") as f:
+		# 	writer = csv.writer(f)
+		# 	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+		# 	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type))
 		
-	if file_type == 'xml':
-		with open("full_list_structs_xml.csv","w") as f:
-			writer = csv.writer(f)
-			writer.writerow(["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
-			writer.writerows(zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type))
+	# if file_type == 'xml':
+	# 	with open("full_list_structs_xml.csv","w") as f:
+	# 		writer = csv.writer(f)
+	# 		writer.writerow(["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+	# 		writer.writerows(zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type))
 
-		with open("unique_list_structs_xml.csv","w")  as f:
-			writer = csv.writer(f)
-			writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
-			writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type))
+		# with open("unique_list_structs_xml.csv","w")  as f:
+		# 	writer = csv.writer(f)
+		# 	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+		# 	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type))
 	
-	with open("names_to_convert.csv","w") as f:
-		writer = csv.writer(f)
-		writer.writerow(["In-House Name","Proposed Name"])
-		writer.writerows(zip(names_to_convert,names_to_convert_proposal))
+	# with open("names_to_convert.csv","w") as f:
+	# 	writer = csv.writer(f)
+	# 	writer.writerow(["In-House Name","Proposed Name"])
+	# 	writer.writerows(zip(names_to_convert,names_to_convert_proposal))
+	if file_type=='dcm':
+		write_csv("full_list_structs.csv",zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type),headers=["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+	elif file_type=='xml':
+		write_csv("full_list_structs_xml.csv",zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type),
+			headers=["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
 
-	# to do , dont overwrite if exists
-	with open("additional_allowed_names.csv", "w") as f:
-		writer = csv.writer(f)
+	write_csv("unique_list_structs.csv",zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type), headers = ["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])	
+	write_csv("names_to_convert.csv",content=zip(names_to_convert,names_to_convert_proposal),headers=["In-House Name","Proposed Name"])
+	write_csv("additional_allowed_names.csv",zip(sorted(compliance_check.get_additional_names())),overwrite=False)
+	# with open("additional_allowed_names.csv", "w") as f:
+	# 	writer = csv.writer(f)
 
-		writer.writerows(zip(sorted(compliance_check.get_additional_names())))
+	# 	writer.writerows(zip(sorted(compliance_check.get_additional_names())))
 
 	print("Compliance rate:", uniq_match.count(True),"/",len(uniq_match), "-->", round(100*uniq_match.count(True)/len(uniq_match),2),"%")
 	print("*********", time.time() - start_time,  "*********")
 
+
+def write_csv(file_name,content,headers=[],overwrite=True):
+	if overwrite: 
+		key = 'w'
+	else:
+		key = 'a'
+
+	with open(file_name,key) as f:
+		writer = csv.writer(f)
+		if len(headers) > 0:
+			writer.writerow(headers)
+		writer.writerows(content)
 
 
 if __name__ == '__main__':
