@@ -103,8 +103,7 @@ def main():
 		xml_ids, xml_types, temp_apps, temp_sites, last_names,last_dates,last_actions,created_names,created_dates,created_actions, names, vol_types, codes = [],[],[],[],[],[],[],[],[],[],[],[],[]
 	
 
-	names_to_convert = []
-	names_to_convert_proposal = []
+	names_to_convert, to_convert_instances, to_convert_reasons, names_to_convert_proposal = [],[],[],[]
 
 	for i in range(len(rs_files)):
 		# print(i)
@@ -209,6 +208,11 @@ def main():
 					if not match and name not in names_to_convert:
 						names_to_convert.append(name)
 						names_to_convert_proposal.append(proposed_name)
+						to_convert_reasons.append(reason)
+						to_convert_instances.append(1)
+					elif not match:
+						uniq_index = names_to_convert.index(name)
+						to_convert_instances[uniq_index] += 1
 
 				
 				uniq_match.append(match)
@@ -232,42 +236,16 @@ def main():
 
 
 	detailed_output = False
-	# TO DO make it a fn for headers and vars , for now hard coding
-	# if file_type == 'dcm':
-	# 	if detailed_output:
-	# 		with open("full_list_structs.csv","w") as f:
-	# 			writer = csv.writer(f)
-	# 			writer.writerow(["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
-	# 			writer.writerows(zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type))
 
-		# with open("unique_list_structs.csv","w") as f:
-		# 	writer = csv.writer(f)
-		# 	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
-		# 	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type))
-		
-	# if file_type == 'xml':
-	# 	with open("full_list_structs_xml.csv","w") as f:
-	# 		writer = csv.writer(f)
-	# 		writer.writerow(["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
-	# 		writer.writerows(zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type))
-
-		# with open("unique_list_structs_xml.csv","w")  as f:
-		# 	writer = csv.writer(f)
-		# 	writer.writerow(["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
-		# 	writer.writerows(zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type))
-	
-	# with open("names_to_convert.csv","w") as f:
-	# 	writer = csv.writer(f)
-	# 	writer.writerow(["In-House Name","Proposed Name"])
-	# 	writer.writerows(zip(names_to_convert,names_to_convert_proposal))
 	if file_type=='dcm':
-		write_csv("full_list_structs.csv",zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type),headers=["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+		write_csv("individual_list_structs_dcm.csv",zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type),headers=["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
 	elif file_type=='xml':
-		write_csv("full_list_structs_xml.csv",zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type),
+		write_csv("individual_list_structs_xml.csv",zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type),
 			headers=["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
 
+	write_csv("NAMES_TO_CONVERT.csv",zip(names_to_convert,to_convert_instances,to_convert_reasons,names_to_convert_proposal),headers=["In-House Name","Instances","Reason for non-compliance","Proposed TG263 name"])
 	write_csv("unique_list_structs.csv",zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type), headers = ["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])	
-	write_csv("names_to_convert.csv",content=zip(names_to_convert,names_to_convert_proposal),headers=["In-House Name","Proposed Name"])
+	# write_csv("names_to_convert.csv",content=zip(names_to_convert,names_to_convert_proposal),headers=["In-House Name","Proposed Name"])
 	write_csv("additional_allowed_names.csv",zip(sorted(compliance_check.get_additional_names())),overwrite=False)
 	# with open("additional_allowed_names.csv", "w") as f:
 	# 	writer = csv.writer(f)
