@@ -59,7 +59,7 @@ def main():
 	elif file_type == 'xml':
 		rs_files, new_names = loaders.load_xml_data(path)
 	else:
-		raise Exception("Please specify one of the following file types: xml or dcm.")
+		raise Exception("Please specify one of the following file types in config.py: xml or dcm.")
 
 
 
@@ -106,13 +106,13 @@ def main():
 	names_to_convert, to_convert_instances, to_convert_reasons, names_to_convert_proposal = [],[],[],[]
 
 	for i in range(len(rs_files)):
-		# print(i)
+		# print("i",i)
 		#TODO: messy calling multiple times
 		if file_type == 'xml':
 			temp_id, temp_type, temp_app, temp_site, last_name,last_date,last_action,created_name,created_date,created_action, ids, namex, vol_type, code = parse_xml.parse_structure_xml(path+rs_files[i])
 
 		for j in range(len(new_names[i])):
-			# print(j)
+			# print("j",j)
 			
 			col_file.append(rs_files[i].replace(path,""))
 			if file_type == 'xml':
@@ -149,6 +149,9 @@ def main():
 				instances[uniq_index] += 1
 
 				# print("namealready in")
+				if name in names_to_convert:
+					uniq_index = names_to_convert.index(name)
+					to_convert_instances[uniq_index] += 1
 
 			else:
 				col_name.append(name)
@@ -204,15 +207,24 @@ def main():
 					col_propname.append(proposed_name)
 					col_reason.append(reason) 
 
+					print(name,match,name in names_to_convert)
 
 					if not match and name not in names_to_convert:
+						print(name)
+						print(names_to_convert)
 						names_to_convert.append(name)
 						names_to_convert_proposal.append(proposed_name)
 						to_convert_reasons.append(reason)
 						to_convert_instances.append(1)
-					elif not match:
-						uniq_index = names_to_convert.index(name)
-						to_convert_instances[uniq_index] += 1
+					# else:
+						# print("NOT MATCH",name)
+					# elif name in names_to_convert:
+						# print("*************************")
+						# print(name)
+
+						# uniq_index = names_to_convert.index(name)
+						# to_convert_instances[uniq_index] += 1
+						# print(uniq)
 
 				
 				uniq_match.append(match)

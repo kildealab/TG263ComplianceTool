@@ -55,7 +55,7 @@ def get_proposed_name(name,tg_names,use_fuzzy = False):
 
 
 		if name.lower() == tg_name.lower():
-			print("casing")
+			# print("casing")
 			return tg_name, "casing"
 
 		elif name.lower().replace(" ", "") == tg_name.lower():
@@ -112,8 +112,8 @@ def get_proposed_name(name,tg_names,use_fuzzy = False):
 				if tg_name_rev[0] == "r" or tg_name_rev[0]=='l':
 					
 					tg_name_rev = tg_name_rev[1:] +tg_name_rev[0]
-					if 'temporal' in tg_name.lower():
-							print(tg_name_rev)
+					# if 'temporal' in tg_name.lower():
+					# 		print(tg_name_rev)
 
 			if split_name == tg_name.lower().split("_"):
 				return tg_name, "Wrong order of words"
