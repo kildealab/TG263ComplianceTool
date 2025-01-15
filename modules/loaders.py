@@ -41,10 +41,12 @@ def load_tg_263(tg_path="../data/",tg_name="TG263_Nomenclature_Worksheet_2017081
 	return tg_names, tg_names_rev
 
 def load_additional_names(file_name="additional_allowed_names.csv"):
-	global additional_allowed_names
 	if os.path.isfile(file_name):
 		with open(file_name, 'r') as fil:
 			additional_allowed_names = [line.rstrip('\n') for line in fil]
+	else:
+		additional_allowed_names = [] 
+	return additional_allowed_names
 
 def find_RS_files_recursive(PATH,avoid_root_keywords=[]):
 	# rs_files = glob.glob()

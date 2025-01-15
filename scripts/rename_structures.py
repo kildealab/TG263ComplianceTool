@@ -46,15 +46,14 @@ def main():
 
 	if save_path == '':
 		fd = os.path.abspath(os.path.dirname(__file__)) # current file directory, for constructing relative paths
-		save_path = os.path.join(fd,'../output')
+		save_path = os.path.join(fd,'../output/')
 
-	
 	if file_type == 'dcm':
 		files = loaders.find_RS_files_recursive(PATH,avoid_root_keywords=['kV_CBCT'])
-		rename_dicom_rt(name_dict, PATH, save_path)
+		rename_dicom_rt(name_dict, PATH, os.path.join(save_path,"dicom/"))
 	elif file_type == 'xml':
 		files, names = loaders.load_xml_data(PATH)
-		rename_xml_template(name_dict,files,PATH,save_path)
+		rename_xml_template(name_dict,files,PATH,os.path.join(save_path,"xml/"))
 	else:
 		raise Exception("Please specify one of the following file types in config.py: xml or dcm.")
 

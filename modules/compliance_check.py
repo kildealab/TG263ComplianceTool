@@ -3,6 +3,8 @@ import string
 # from thefuzz import process
 import os
 
+from modules.loaders import load_additional_names
+
 
 common_mispellings = {
 	'brachialplexus': 'brachialplex',
@@ -25,7 +27,12 @@ common_mispellings = {
 	
 }
 
-additional_allowed_names = []
+# Loads the CSV with additional nomenclatures that are TG 263 compliant, but not explicitly in the original CSV
+# Names were automatically added after passing through the compliance check in this code. 
+# This CSV is unecessary, but saves time for repeated words that have already been checked.
+fd = os.path.abspath(os.path.dirname(__file__)) # current file directory, for constructing relative paths later
+additional_allowed_names = load_additional_names(os.path.join(fd,"../data/additional_allowed_names.csv"))
+
 
 
 def get_proposed_name(name,tg_names,use_fuzzy = False):

@@ -47,10 +47,7 @@ def main():
 
 
 
-	# Loads the CSV with additional nomenclatures that are TG 263 compliant, but not explicitly in the original CSV
-	# Names were automatically added after passing through the compliance check in this code. 
-	# This CSV is unecessary, but saves time for repeated words that have already been checked.
-	loaders.load_additional_names() 
+	
 
 	# Get the list of DICOM RS files and the structure names in them
 	if file_type == 'dcm':
@@ -249,15 +246,15 @@ def main():
 	detailed_output = False
 
 	if file_type=='dcm':
-		write_csv("individual_list_structs_dcm.csv",zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type),headers=["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
+		write_csv(os.path.join(fd,"../output/individual_list_structs_dcm.csv"),zip(col_file, col_name,col_length,col_match,col_propname,col_reason,col_type),headers=["File","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
 	elif file_type=='xml':
-		write_csv("individual_list_structs_xml.csv",zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type),
+		write_csv(os.path.join(fd,"../output/individual_list_structs_xml.csv"),zip(col_file,xml_ids,xml_types,temp_apps,temp_sites,last_names,last_dates,last_actions,created_names,created_dates,created_actions,names,vol_types,codes, col_name,col_length,col_match,col_propname,col_reason,col_type),
 			headers=["File","ID","type","ApprovalStatus","Site","last_name","last_date","last_action","created_name","created_date","created_action","name","volumeType","code","In-House Name","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])
 
 	write_csv("NAMES_TO_CONVERT.csv",zip(names_to_convert,to_convert_instances,to_convert_reasons,names_to_convert_proposal),headers=["In-House Name","Instances","Reason for non-compliance","Proposed TG263 name"])
-	write_csv("unique_list_structs.csv",zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type), headers = ["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])	
+	write_csv(os.path.join(fd,"../output/unique_list_structs.csv"),zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type), headers = ["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])	
 	# write_csv("names_to_convert.csv",content=zip(names_to_convert,names_to_convert_proposal),headers=["In-House Name","Proposed Name"])
-	write_csv("additional_allowed_names.csv",zip(sorted(compliance_check.get_additional_names())),overwrite=False)
+	write_csv(os.path.join(fd,"../data/additional_allowed_names.csv"),zip(sorted(compliance_check.get_additional_names())),overwrite=True)
 	# with open("additional_allowed_names.csv", "w") as f:
 	# 	writer = csv.writer(f)
 
@@ -265,7 +262,7 @@ def main():
 
 	print("Compliance rate:", uniq_match.count(True),"/",len(uniq_match), "-->", round(100*uniq_match.count(True)/len(uniq_match),2),"%")
 	print("*********", time.time() - start_time,  "*********")
-
+	print("IMPORTANT: Please review proposed names in NAMES_TO_CONVERT.CSV and fill in the blanks before running rename-structures.")
 
 def write_csv(file_name,content,headers=[],overwrite=True):
 	if overwrite: 

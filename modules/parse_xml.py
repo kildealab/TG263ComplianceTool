@@ -82,7 +82,8 @@ def parse_structure_xml(path):
 
 
 def rename_xml_template(name_dict,files,PATH, save_path):
-	
+	if not os.path.isdir(save_path):
+		os.mkdir(save_path)
 	for file in files:
 		root, tree = extract_root(PATH+file)
 		for structure in root.findall('.//Structure'):
