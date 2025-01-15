@@ -3,7 +3,7 @@ import string
 # from thefuzz import process
 import os
 
-from modules.loaders import load_additional_names
+import modules.loaders as loaders
 
 
 common_mispellings = {
@@ -27,15 +27,22 @@ common_mispellings = {
 	
 }
 
+print("Loading TG names...")
 # Loads the CSV with additional nomenclatures that are TG 263 compliant, but not explicitly in the original CSV
 # Names were automatically added after passing through the compliance check in this code. 
 # This CSV is unecessary, but saves time for repeated words that have already been checked.
 fd = os.path.abspath(os.path.dirname(__file__)) # current file directory, for constructing relative paths later
-additional_allowed_names = load_additional_names(os.path.join(fd,"../data/additional_allowed_names.csv"))
+additional_allowed_names = loaders.load_additional_names(os.path.join(fd,"../data/additional_allowed_names.csv"))
+tg_names, tg_names_rev = loaders.load_tg_263(tg_path=os.path.join(fd,"../data/"))
 
 
+def check_in_TG(name,tg_names=tg_names):
+	if name in tg_names:
+		return True
+	return False
 
-def get_proposed_name(name,tg_names,use_fuzzy = False):
+
+def get_proposed_name(name,tg_names=tg_names,use_fuzzy = False):
 	reason = ""
 	if (name[0] == 'Z' and len(name) <= 16):
 		return 'z' + name[1:], "Capital Z should be z"
@@ -162,7 +169,7 @@ def get_proposed_name(name,tg_names,use_fuzzy = False):
 
 	return '',''
 
-def check_TG_name(name, tg_names):
+def check_TG_name(name, tg_names=tg_names):
 	original_length = len(name)
 	original_name = name
 	reason = ''
@@ -257,7 +264,7 @@ def check_TG_name(name, tg_names):
 	
 
 
-def check_target_compliance(target_name,tg_names=[]):
+def check_target_compliance(target_name,tg_names=tg_names):
 	'''
 	check_target_compliance	XXXXX The code works by going through each part of the target name and removing the parts 
 							that comply from beginning to end of word. This means the code can go through the rules one
@@ -304,6 +311,7 @@ def check_target_compliance(target_name,tg_names=[]):
 	list_allowed_classifiers = ['n', 'sb', 'par','p', 'vas', 'v',''] # Rule 2 - target classifiers allowed, including none
 	#note: ordering of the above matters, PTV! sb before PTV, and '' should be last -- this is for when removing it from prefix
 	#note: similarly, the list allowed classifiers should have the longer names first if the start letter is also a valid classifier (eg vas before v)	
+	
 	if not target_prefix.startswith(tuple(list_allowed_prefixes)): # Rule 1: name does not start with an allowed prefix
 		reason = "Fails rule 1 for target structures"
 		return False, reason
@@ -334,7 +342,6 @@ def check_target_compliance(target_name,tg_names=[]):
 		if target_prefix[0].isalpha():
 			compliant = False
 			for c in list_allowed_classifiers:
-				print(target_prefix,c)
 				if target_prefix.startswith(c):
 					compliant = True
 					target_prefix = target_prefix.replace(c,'') # Remove compliant char(s) for rule 2
@@ -387,16 +394,26 @@ def check_target_compliance(target_name,tg_names=[]):
 	
 	# TO DO: SKIPPING RULES 4 AND 5 FOR NOW
 	# for rule 5, check thorugh TG again, however will need to do starts with i believe to accoutn for extra dose etc put at end
-	# then need to remove it and analyse rest of structure as before
+	# then need to remove it and analyse rest of structure as before -- but sb "PTV_Liver_2000x3", so strrucure comes befor edose i think
+
+
 
 
 	if target_suffix != '': # If there were character(s) after '_' in the original target name, check their compliance
 		# rule #5
+
+		#*****************************************#
+		#*			    RULE #5  		  	 	 *#
+		#*****************************************#
 		split_suffix = target_suffix[1:].split("_")[0]
 		# print("target", target_suffix)
 		# print("split",split_suffix)
-		if target_suffix[0] == "_" and split_suffix in tg_names:
-			target_suffix = target_suffix[1:].replace(split_suffix,'')
+		# print(target_suffix)
+		# print(tg_names)
+		if target_suffix[0] == "_":
+			if check_TG_name(split_suffix[1:]):
+
+				target_suffix = target_suffix[1:].replace(split_suffix,'')
 
 		# rule #6
 	

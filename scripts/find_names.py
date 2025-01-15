@@ -43,7 +43,7 @@ def main():
 	
 
 	# Load the official TG 263 CSV containing list of allowed names
-	tg_names, tg_names_rev = loaders.load_tg_263(tg_path=os.path.join(fd,"../data/"))
+	# tg_names, tg_names_rev = loaders.load_tg_263(tg_path=os.path.join(fd,"../data/"))
 
 
 
@@ -168,7 +168,7 @@ def main():
 				col_type.append(struct_type)
 
 
-				if name in tg_names: # Check if name in TG list 
+				if compliance_check.check_in_TG(name): # Check if name in TG list 
 					match = True
 					col_match.append("True")
 					col_propname.append("")
@@ -180,13 +180,13 @@ def main():
 
 				else:
 					if struct_type == "non-target":
-						match, reason = compliance_check.check_TG_name(name, tg_names)
+						match, reason = compliance_check.check_TG_name(name)#, tg_names)
 						if not match:
-							proposed_name, reason = compliance_check.get_proposed_name(name,tg_names)
+							proposed_name, reason = compliance_check.get_proposed_name(name)#,tg_names)
 
 						# match = False
 					else:
-						match, reason = compliance_check.check_target_compliance(name, tg_names) # Check target name compliance
+						match, reason = compliance_check.check_target_compliance(name)#, tg_names) # Check target name compliance
 						
 					
 					col_match.append(match)
@@ -261,7 +261,7 @@ def main():
 	# 	writer.writerows(zip(sorted(compliance_check.get_additional_names())))
 
 	print("Compliance rate:", uniq_match.count(True),"/",len(uniq_match), "-->", round(100*uniq_match.count(True)/len(uniq_match),2),"%")
-	print("*********", time.time() - start_time,  "*********")
+	print("*********", time.time() - start_time,  "seconds *********")
 	print("IMPORTANT: Please review proposed names in NAMES_TO_CONVERT.CSV and fill in the blanks before running rename-structures.")
 
 def write_csv(file_name,content,headers=[],overwrite=True):
