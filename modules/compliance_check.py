@@ -301,9 +301,9 @@ def check_target_compliance(target_name,tg_names=[]):
 
 	# CHECKING PREFIX
 	list_allowed_prefixes = ['PTV!','GTV','CTV','ITV','IGTV','ICTV','PTV'] # Rule 1
-	list_allowed_classifiers = ['n', 'p', 'sb', 'par', 'v', 'vas',''] # Rule 2 - target classifiers allowed, including none
+	list_allowed_classifiers = ['n', 'sb', 'par','p', 'vas', 'v',''] # Rule 2 - target classifiers allowed, including none
 	#note: ordering of the above matters, PTV! sb before PTV, and '' should be last -- this is for when removing it from prefix
-	
+	#note: similarly, the list allowed classifiers should have the longer names first if the start letter is also a valid classifier (eg vas before v)	
 	if not target_prefix.startswith(tuple(list_allowed_prefixes)): # Rule 1: name does not start with an allowed prefix
 		reason = "Fails rule 1 for target structures"
 		return False, reason
@@ -334,6 +334,7 @@ def check_target_compliance(target_name,tg_names=[]):
 		if target_prefix[0].isalpha():
 			compliant = False
 			for c in list_allowed_classifiers:
+				print(target_prefix,c)
 				if target_prefix.startswith(c):
 					compliant = True
 					target_prefix = target_prefix.replace(c,'') # Remove compliant char(s) for rule 2
