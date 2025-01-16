@@ -6,10 +6,10 @@ import csv, os
 # save_path = './'
 # save_path_dcm = './NEW_dicoms/'
 
-from modules.parse_xml import rename_xml_template
-from modules.parse_dcm import rename_dicom_rt
+from TG263ComplianceTool.parse_xml import rename_xml_template
+from TG263ComplianceTool.parse_dcm import rename_dicom_rt
 from config import config
-import modules.loaders as loaders
+import TG263ComplianceTool.loaders as loaders
 
 # rs_files, new_names = load_xml_data(path)
 

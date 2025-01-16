@@ -3,7 +3,7 @@ import string
 # from thefuzz import process
 import os
 
-import modules.loaders as loaders
+import TG263ComplianceTool.loaders as loaders
 
 
 common_mispellings = {
@@ -26,6 +26,7 @@ common_mispellings = {
 	
 	
 }
+debug = True
 
 print("Loading TG names...")
 # Loads the CSV with additional nomenclatures that are TG 263 compliant, but not explicitly in the original CSV
@@ -270,7 +271,7 @@ def check_target_compliance(target_name,tg_names=tg_names):
 							that comply from beginning to end of word. This means the code can go through the rules one
 							at a time to check for compliance. TODOL add link to paper, section 8.2
 	'''
-	debug = False
+	debug = True
 	reason = ''
 	#first check if there are spaces, then it's automatically not TG 263 compliant
 	if ' ' in target_name:
@@ -306,6 +307,10 @@ def check_target_compliance(target_name,tg_names=tg_names):
 	if target_name in additional_allowed_names:
 		return True, reason
 
+	#*****************************************#
+	#*			    RULE #1  		  	 	 *#
+	#*****************************************#
+
 	# CHECKING PREFIX
 	list_allowed_prefixes = ['PTV!','GTV','CTV','ITV','IGTV','ICTV','PTV'] # Rule 1
 	list_allowed_classifiers = ['n', 'sb', 'par','p', 'vas', 'v',''] # Rule 2 - target classifiers allowed, including none
@@ -324,7 +329,7 @@ def check_target_compliance(target_name,tg_names=tg_names):
 			break
    
 	if debug:
-		print("After Rule 1:",target_prefix)
+		print("Prefix after Rule 1:",target_prefix)
 
 	
 	
@@ -337,7 +342,11 @@ def check_target_compliance(target_name,tg_names=tg_names):
 #             return True, reason
 		
 		# need to check rule 8 again, since could show up in prefix if no _
-		
+
+		#*****************************************#
+		#*			    RULE #2  		  	 	 *#
+		#*****************************************#
+
 		# Check if remaining char(s) are an allowed classifier (Rule #2)
 		if target_prefix[0].isalpha():
 			compliant = False
@@ -350,7 +359,7 @@ def check_target_compliance(target_name,tg_names=tg_names):
 				reason = "Fails rule 2 for target structures"
 				return False, reason
 		if debug:
-			print("After rule 2:",target_prefix)
+			print("Prefix fter rule 2:",target_prefix)
 			
 		'''
 		prefix_no_digits = target_prefix.rstrip(string.digits)
@@ -371,6 +380,9 @@ def check_target_compliance(target_name,tg_names=tg_names):
 		
 		# Check remaining char(s) in prefix after removing rule 1 and 2
 		if target_prefix != '':
+			#*****************************************#
+			#*			    RULE #3  		  	 	 *#
+			#*****************************************#
 			if target_prefix[0].isdigit(): # If next character is a digit, it is compliant (rule 3)
 				target_prefix = target_prefix[1:] # Remove compliant digit
 			
@@ -386,7 +398,7 @@ def check_target_compliance(target_name,tg_names=tg_names):
 			reason = "fails rule 3"
 			return False, reason
 		'''
-			
+	print("After Rule 3: Prefix:",target_prefix, ", Suffix:", target_suffix)
 			
 	# TO DO -- check if ends with -xx for prefix eg CTVp2-05 ^^ this is achieved above
 	
@@ -397,21 +409,49 @@ def check_target_compliance(target_name,tg_names=tg_names):
 	# then need to remove it and analyse rest of structure as before -- but sb "PTV_Liver_2000x3", so strrucure comes befor edose i think
 
 
-
+	
 
 	if target_suffix != '': # If there were character(s) after '_' in the original target name, check their compliance
+		split_suffix = target_suffix[1:].split("_")[0]
+		if debug:
+			print("target", target_suffix)
+			print("split",split_suffix)
+			print(target_suffix)
+
+		#*****************************************#
+		#*			    RULE #4 		  	 	 *#
+		#*****************************************#
+		allowed_modalities = ['CT','PT','MR','SP']
+
+		modalities_used = ''
+		while(True):
+			if split_suffix.startswith(tuple(allowed_modalities)):
+
+				if len(split_suffix) < 3 or not split_suffix[2].isdigit():
+					return False, 'Imaging modality should be followed by sequential number (Target rule #5)'
+				else:
+					print("i am here")
+					modalities_used += split_suffix[0:3]
+					split_suffix = split_suffix[3:]
+					# print(split_suffix)
+			else:
+				break
+		
+		target_suffix = target_suffix.replace(modalities_used,'')
+
+		if debug:
+			print("Target suffix after rule 4:", target_suffix)
+		# print(target_suffix)
 		# rule #5
 
 		#*****************************************#
 		#*			    RULE #5  		  	 	 *#
 		#*****************************************#
-		split_suffix = target_suffix[1:].split("_")[0]
-		# print("target", target_suffix)
-		# print("split",split_suffix)
-		# print(target_suffix)
+
 		# print(tg_names)
 		if target_suffix[0] == "_":
-			if check_TG_name(split_suffix[1:]):
+			if check_TG_name(split_suffix)[0]:
+				print("AM HERE")
 
 				target_suffix = target_suffix[1:].replace(split_suffix,'')
 
@@ -420,8 +460,11 @@ def check_target_compliance(target_name,tg_names=tg_names):
 
 		relative_dose_suffixes = ["_High", "_Mid","_Low"]
 		if debug:
-			print("suffix", target_suffix)
+			print("After rule 5", target_suffix)
 
+		#*****************************************#
+		#*			    RULE #6  		  	 	 *#
+		#*****************************************#
 		numerical_dose = False
 		if target_suffix.startswith(tuple(relative_dose_suffixes)):
 			#ok it is relavice dose
@@ -429,6 +472,11 @@ def check_target_compliance(target_name,tg_names=tg_names):
 			for r in relative_dose_suffixes:
 				if target_suffix.startswith(r):
 					target_suffix = target_suffix.replace(r,'')
+
+					# Rule #6 subpoint: Mid+2-digit enumerator
+					if r == '_Mid':
+						if re.match(r'\d{2}',target_suffix[0:2]):
+							target_suffix = target_suffix[2:]
 					break
 
 			placeholder = 1
@@ -441,6 +489,10 @@ def check_target_compliance(target_name,tg_names=tg_names):
 
 		if debug:
 			print("After rule 6: ", target_suffix)
+
+		#*****************************************#
+		#*			    RULE #7 		  	 	 *#
+		#*****************************************#
 		if numerical_dose: #rule 7, this is optional, only if the # fx are indicated it should be with an x
 			fraction_pattern = r'^x\d{1,2}'
 			if bool(re.match(fraction_pattern, target_suffix)):
@@ -450,14 +502,18 @@ def check_target_compliance(target_name,tg_names=tg_names):
 			if debug:
 				print("After rule 7: ", target_suffix)
 
-		#rule 8
+		#*****************************************#
+		#*			    RULE #8  		  	 	 *#
+		#*****************************************#
 		if bool(re.match(r'^-\d{2}', target_suffix)):
 			target_suffix = target_suffix[3:]
 
 			if debug:
 				print("after rule 8:", target_suffix)
 
-		# rule 9
+	#*****************************************#
+	#*			    RULE #9  		  	 	 *#
+	#*****************************************#
 	if target_suffix == '' or target_suffix[0] == "^":
 #             print("ALL GOODDDDDD")
 		if target_name not in additional_allowed_names:

@@ -11,9 +11,9 @@ import csv
 # from compliance_check import check_TG_name, check_target_compliance, get_proposed_name,get_additional_names,load_additional_names
 # from parse_xml_template import load_xml_data, parse_structure_xml
 
-import modules.loaders as loaders
-import modules.compliance_check as compliance_check
-import modules.parse_xml as parse_xml
+import TG263ComplianceTool.loaders as loaders
+import TG263ComplianceTool.compliance_check as compliance_check
+import TG263ComplianceTool.parse_xml as parse_xml
 from config import config
 
 

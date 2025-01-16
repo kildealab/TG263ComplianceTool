@@ -3,8 +3,8 @@ import csv
 import pandas as pd
 import csv
 
-import modules.parse_dcm as parse_dcm
-import modules.parse_xml as parse_xml
+import TG263ComplianceTool.parse_dcm as parse_dcm
+import TG263ComplianceTool.parse_xml as parse_xml
 
 
 def load_csv(csv_path="."):

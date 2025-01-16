@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
 
-# add readme/requirements
-
 setup(
 	name="rtstruct-tg263",
 	author="Kayla O'Sullivan-Steben",
