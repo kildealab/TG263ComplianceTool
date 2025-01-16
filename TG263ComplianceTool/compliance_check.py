@@ -423,7 +423,7 @@ def check_target_compliance(target_name,tg_names=tg_names):
 		#*****************************************#
 		allowed_modalities = ['CT','PT','MR','SP']
 
-		modality_counter = 0
+		modality_string = '_'
 		while(True):
 			if split_suffix.startswith(tuple(allowed_modalities)):
 
@@ -431,27 +431,28 @@ def check_target_compliance(target_name,tg_names=tg_names):
 					return False, 'Imaging modality should be followed by sequential number (Target rule #5)'
 				else:
 					print("i am here")
-					modality_counter+=1
+					modality_string+=split_suffix[0:3]
 					split_suffix = split_suffix[3:]
 					# print(split_suffix)
 			else:
 				break
-		
-		if modality_counter > 0:
-			target_suffix = target_suffix[1+modality_counter*3]
+
+		if modality_string != '_':
+			target_suffix = target_suffix.replace(modality_string,'')
 
 		if debug:
 			print("Target suffix after rule 4:", target_suffix)
 		# print(target_suffix)
 		# rule #5
 
-		#*****************************************#
-		#*			    RULE #5  		  	 	 *#
-		#*****************************************#
-
+	#*****************************************#
+	#*			    RULE #5  		  	 	 *#
+	#*****************************************#
+	if target_suffix != '':
 		# print(tg_names)
 		if target_suffix[0] == "_":
 			split_suffix_list = target_suffix[1:].split('_')
+			print(split_suffix_list)
 			found_struct = False
 			if len(split_suffix_list) > 2:
 				two_underscore = split_suffix_list[0]+"_"+split_suffix_list[1]+"_"+split_suffix_list[2]
@@ -471,19 +472,19 @@ def check_target_compliance(target_name,tg_names=tg_names):
 			if not found_struct and check_TG_name(split_suffix_list[0])[0]:
 				print("AM HERE")
 
-				target_suffix = target_suffix[1:].replace(split_suffix,'')
+				target_suffix = target_suffix[1:].replace(split_suffix_list[0],'')
 
-		# rule #6
-	
-
-		relative_dose_suffixes = ["_High", "_Mid","_Low"]
 		if debug:
 			print("After rule 5", target_suffix)
+
+		relative_dose_suffixes = ["_High", "_Mid","_Low"]
+		
 
 		#*****************************************#
 		#*			    RULE #6  		  	 	 *#
 		#*****************************************#
 		numerical_dose = False
+
 		if target_suffix.startswith(tuple(relative_dose_suffixes)):
 			#ok it is relavice dose
 			# TO DO: add 01 02 etc
@@ -504,6 +505,15 @@ def check_target_compliance(target_name,tg_names=tg_names):
 			placeholder = 2
 			numerical_dose = True
 	#     elif : TO DO : Gy
+		elif 'Gy' in target_suffix:
+			print("Foudn Gy:")
+			match = re.match(r'\b_\d{1,2}(?:\.\d{1,2}|p\d{1,2})?Gy',target_suffix)
+
+			if match: # Extract the matched string 
+				matched_text = match.group(0) # Remove the matched text from target_suffix 
+				target_suffix = target_suffix.replace(matched_text, '')
+				numerical_dose = True
+
 
 		if debug:
 			print("After rule 6: ", target_suffix)
