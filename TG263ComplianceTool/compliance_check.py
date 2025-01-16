@@ -423,7 +423,7 @@ def check_target_compliance(target_name,tg_names=tg_names):
 		#*****************************************#
 		allowed_modalities = ['CT','PT','MR','SP']
 
-		modalities_used = ''
+		modality_counter = 0
 		while(True):
 			if split_suffix.startswith(tuple(allowed_modalities)):
 
@@ -431,13 +431,14 @@ def check_target_compliance(target_name,tg_names=tg_names):
 					return False, 'Imaging modality should be followed by sequential number (Target rule #5)'
 				else:
 					print("i am here")
-					modalities_used += split_suffix[0:3]
+					modality_counter+=1
 					split_suffix = split_suffix[3:]
 					# print(split_suffix)
 			else:
 				break
 		
-		target_suffix = target_suffix.replace(modalities_used,'')
+		if modality_counter > 0:
+			target_suffix = target_suffix[1+modality_counter*3]
 
 		if debug:
 			print("Target suffix after rule 4:", target_suffix)
@@ -450,7 +451,24 @@ def check_target_compliance(target_name,tg_names=tg_names):
 
 		# print(tg_names)
 		if target_suffix[0] == "_":
-			if check_TG_name(split_suffix)[0]:
+			split_suffix_list = target_suffix[1:].split('_')
+			found_struct = False
+			if len(split_suffix_list) > 2:
+				two_underscore = split_suffix_list[0]+"_"+split_suffix_list[1]+"_"+split_suffix_list[2]
+				if check_TG_name(two_underscore)[0]:
+					print("third check")
+					target_suffix = target_suffix[1:].replace(two_underscore,'')
+					found_struct = True
+
+
+			if not found_struct and len(split_suffix_list) > 1:
+				one_underscore =  split_suffix_list[0]+"_"+split_suffix_list[1]
+				if check_TG_name(one_underscore)[0]:
+					print("second check")
+					target_suffix = target_suffix[1:].replace(one_underscore,'')
+					found_struct = True
+
+			if not found_struct and check_TG_name(split_suffix_list[0])[0]:
 				print("AM HERE")
 
 				target_suffix = target_suffix[1:].replace(split_suffix,'')
