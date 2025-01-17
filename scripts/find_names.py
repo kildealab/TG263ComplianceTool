@@ -12,7 +12,8 @@ import csv
 # from parse_xml_template import load_xml_data, parse_structure_xml
 
 import TG263ComplianceTool.loaders as loaders
-import TG263ComplianceTool.compliance_check as compliance_check
+import TG263ComplianceTool.structure_compliance as structure_compliance
+import TG263ComplianceTool.target_compliance as target_compliance
 import TG263ComplianceTool.parse_xml as parse_xml
 from config import config
 
@@ -180,13 +181,13 @@ def main():
 
 				else:
 					if struct_type == "non-target":
-						match, reason = compliance_check.check_TG_name(name)#, tg_names)
+						match, reason = structure_compliance.check_TG_name(name)#, tg_names)
 						if not match:
-							proposed_name, reason = compliance_check.get_proposed_name(name)#,tg_names)
+							proposed_name, reason = structure_compliance.get_proposed_name(name)#,tg_names)
 
 						# match = False
 					else:
-						match, reason = compliance_check.check_target_compliance(name)#, tg_names) # Check target name compliance
+						match, reason = target_compliance.check_target_compliance(name)#, tg_names) # Check target name compliance
 						
 					
 					col_match.append(match)
@@ -254,7 +255,7 @@ def main():
 	write_csv("NAMES_TO_CONVERT.csv",zip(names_to_convert,to_convert_instances,to_convert_reasons,names_to_convert_proposal),headers=["In-House Name","Instances","Reason for non-compliance","Proposed TG263 name"])
 	write_csv(os.path.join(fd,"../output/unique_list_structs.csv"),zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type), headers = ["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])	
 	# write_csv("names_to_convert.csv",content=zip(names_to_convert,names_to_convert_proposal),headers=["In-House Name","Proposed Name"])
-	write_csv(os.path.join(fd,"../data/additional_allowed_names.csv"),zip(sorted(compliance_check.get_additional_names())),overwrite=True)
+	write_csv(os.path.join(fd,"../data/additional_allowed_names.csv"),zip(sorted(structure_check.get_additional_names())),overwrite=True)
 	# with open("additional_allowed_names.csv", "w") as f:
 	# 	writer = csv.writer(f)
 
