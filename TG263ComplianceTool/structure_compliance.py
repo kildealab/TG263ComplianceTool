@@ -43,7 +43,7 @@ def check_in_TG(name,tg_names=tg_names):
 	return False
 
 
-def get_proposed_name(name,tg_names=tg_names,use_fuzzy = False):
+def get_proposed_name(name,tg_names=tg_names):
 	reason = ""
 	if (name[0] == 'Z' and len(name) <= 16):
 		return 'z' + name[1:], "Capital Z should be z"
@@ -161,12 +161,6 @@ def get_proposed_name(name,tg_names=tg_names,use_fuzzy = False):
 				return "", "need to start with z but name too long"
 			
 	
-	if use_fuzzy:
-		# print("in fuz")
-		closest_match = process.extractOne(name, tg_names)
-
-
-		return closest_match[0], 'using fuzzy'
 
 	return '',''
 
