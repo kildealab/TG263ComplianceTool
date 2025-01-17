@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-	name="rtstruct-tg263",
+	name="TG263ComplianceTool",
 	author="Kayla O'Sullivan-Steben",
 	author_email="kayla.osullivan-steben@mcgill.mail.ca",
 	version='0.1',

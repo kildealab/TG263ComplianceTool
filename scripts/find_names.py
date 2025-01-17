@@ -169,7 +169,7 @@ def main():
 				col_type.append(struct_type)
 
 
-				if compliance_check.check_in_TG(name): # Check if name in TG list 
+				if structure_compliance.check_in_TG(name): # Check if name in TG list 
 					match = True
 					col_match.append("True")
 					col_propname.append("")
@@ -255,7 +255,7 @@ def main():
 	write_csv("NAMES_TO_CONVERT.csv",zip(names_to_convert,to_convert_instances,to_convert_reasons,names_to_convert_proposal),headers=["In-House Name","Instances","Reason for non-compliance","Proposed TG263 name"])
 	write_csv(os.path.join(fd,"../output/unique_list_structs.csv"),zip(uniq_name, instances, uniq_length,uniq_match,uniq_propname,uniq_reason,uniq_type), headers = ["In-House Name","Instances","Length","Matches TG-263","TG-263 suggestion","Reason","Structure Type"])	
 	# write_csv("names_to_convert.csv",content=zip(names_to_convert,names_to_convert_proposal),headers=["In-House Name","Proposed Name"])
-	write_csv(os.path.join(fd,"../data/additional_allowed_names.csv"),zip(sorted(structure_check.get_additional_names())),overwrite=True)
+	write_csv(os.path.join(fd,"../data/additional_allowed_names.csv"),zip(sorted(structure_compliance.get_additional_names())),overwrite=True)
 	# with open("additional_allowed_names.csv", "w") as f:
 	# 	writer = csv.writer(f)
 

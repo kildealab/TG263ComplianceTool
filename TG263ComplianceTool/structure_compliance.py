@@ -169,14 +169,19 @@ def check_TG_name(name, tg_names=tg_names):
 	original_name = name
 	reason = ''
 
+	
+
+	# RULE 1
+	if len(name) > 16:
+		reason = "Structure names should be 16 characters or less."
+		return False, reason
+
+	# RULE 5
 	if ' ' in name:
 		reason = "spaces"
 		return False, reason
 
-	if len(name) > 16:
-		reason = "> 16 characters"
-		return False, reason
-	
+	# RULE 12
 	if "^" in name: # Rule 12, ignore custom notes after ^
 		name = name[:name.index("^")]
 
@@ -210,6 +215,13 @@ def check_TG_name(name, tg_names=tg_names):
 			
 		if not tg_start:
 			return False, "Does not start with a TG compliant structure name"
+
+		# Rule 3
+		if name.startswith('s'):
+			name = name[1:]
+			
+			if name[0:2] =="_L" or name[0:2]=="_R":
+				name = name[2:]
 
 		#Rule 11
 		if name.startswith("~"):
