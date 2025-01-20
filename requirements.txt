@@ -4,5 +4,5 @@ pydicom==2.4.4
 python-dateutil==2.9.0.post0
 pytz==2024.2
 six==1.17.0
--e git+https://github.com/kildealab/TG263ComplianceTool@b00c91855c82178d2a5b9cc6f15dd6c967ecd17f#egg=TG263ComplianceTool
+-e .
 tzdata==2024.2
