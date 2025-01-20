@@ -1,5 +1,5 @@
 # TG263ComplianceTool
-
+The TG263ComplianceTool is designed to ensure compliance with the TG263 standard for DICOM-RT Structure Set files and XML template files. It automates the process of verifying compliance, proposing new structure names, and renaming DICOM and XML files to meet the required naming conventions. 
 
 ## Table of Contents
 - [Motivation](#Motivation)
@@ -11,8 +11,14 @@
 - [Contact](#Contact)
 
 ## Motivation
+TG 263 provides guidelines for standardized naming of radiotherapy targets and anatomical structures. However, a significant portion of existing data does not perfectly comply with the standard, including data produced before the standard was introduced, as well as data produced afterward, as many clinics do not follow by the standard or do not implement it correctly. This inconsistency makes the analysis of these structures challenging, especially when aggregating large datasets for Big Data and AI. Therefore, the TG263ComplianceTool was created to facilitate the verification and renaming of DICOM and XML files exported from the treatment planning system, thereby simplifyinng downstream analysis tasks.
 
-#### Overview of how X works
+## Features
+* **Automated Compliance Checking**: Automatically checks DICOM files or XML templates for compliance with TG263 standards for both target and anatomical structures.
+* **New Name Proposal**: Proposes replacement compliant names.
+* **File Renaming**: Renames DICOM files and XML templates based on proposed and user-input names.
+* **Configurable Settings**: Allows users to configure file types and paths through a config.py file.
+
 
 ## Dependencies
 * Python >= 3.8
@@ -33,11 +39,7 @@
    ```
    pip install -r requirements.txt
    ```
-4. Install the TG263ComplianceTool package (this will allow you to call the scripts):
-   ```
-   pip install -e .
-   ```
-   Note: the ```-e``` flag allows you to edit code in the package without reinstalling. However, you can also install it as ``` pip install . ``` if you do not want that functionality.
+   Note: the requirements include the line ```-e .```, which installs the current package with editing permissions. This will allow you to call the scripts above, and the ```-e``` flag allows you to edit code in the package without reinstalling.
    
 
 ## Usage
@@ -52,18 +54,23 @@ config = {
 }
 ```
 ### Step 2 - Run the find-names script
-Run the following script to find and check the compliance of XXXX, run the following command line:
+To find and check the compliance of the DICOM files or XML templates, run the following command line:
 ```
 find-names
 ```
-This will produce a XXXX
+This script will produce three csv files:
+* **```NAMES_TO_CONVERT.csv```: contains non-compliant structures and proposed new names. This file  must be edited by the user!**
+* ```output/unique_list_structs.csv``` : for user's interest, contains both compliant and non-compliant names appearing in the data --> shows each name only once (with number of instances)
+* ```output/individual_list_structurs.csv```: for user's interest, contains both compliant and non-compliant names appearing in the data --> shows each individual file and each individual name, with repeats.
+
 ### Step 3 - Verify and fill in structure names to be converted
-Open the file ```NAMES_TO_CONVERT.csv```
+Open the file ```NAMES_TO_CONVERT.csv``` and fill in the blanks where a new name could not be proposed. It is also highly recommended to review the names proposed by the script to ensure that they are correct.
 ### Step 4 - Run the rename-structure script
-To rename the files based on the new names proposed in ```NAMES_TO_CONVERT.csv```, run the following command line:
+To automarically rename the files based on the new names proposed in ```NAMES_TO_CONVERT.csv```, run the following command line:
 ```
 rename-structures
 ```
+The new renamed DICOM and/or XML files will now be in the output directory (or the path specified by the ```save_path``` variable in ```config.py```).
 ## Contributing
 We welcome contributions! If you are interested in contributing, please fork the repository and create a pull request with your changes.
 1. Fork the repository.
@@ -72,7 +79,7 @@ We welcome contributions! If you are interested in contributing, please fork the
 4. Push your branch: `git push origin feature-name`
 5. Create a pull request.
 ## Lincense
-
+This project is licensed under the MIT License - see the LICENSE file for details.
 ## Contact
 For support or questions, please email Kayla O'Sullivan-Steben at kayla.osullivan-steben@mail.mcgill.ca.
 
