@@ -188,7 +188,7 @@ def main():
 						# match = False
 					else:
 						match, reason = target_compliance.check_target_compliance(name)#, tg_names) # Check target name compliance
-						
+						proposed_name = ""
 					
 					col_match.append(match)
 					# if reason == '':
