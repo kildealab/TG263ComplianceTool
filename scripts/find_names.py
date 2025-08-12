@@ -182,8 +182,9 @@ def main():
 				else:
 					if struct_type == "non-target":
 						match, reason = structure_compliance.check_TG_name(name)#, tg_names)
+						proposed_name=""
 						if not match:
-							proposed_name, reason = structure_compliance.get_proposed_name(name)#,tg_names)
+							proposed_name, reason = structure_compliance.get_proposed_name(name,use_fuzzy=False)#,tg_names)
 
 						# match = False
 					else:

@@ -63,7 +63,7 @@ def find_RS_files_recursive(PATH,avoid_root_keywords=[]):
 			# print(root)
 			if not any(keyword in root for keyword in avoid_root_keywords):
 			# if "_CBCT_" not in root and 'old' not in root:
-				print(root)
+				# print(root)
 				rs_files.append(os.path.join(root, file))
 
 		#     print(os.path.join(root, file))

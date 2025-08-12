@@ -32,10 +32,12 @@ def load_RS_names(rs_files):
 def rename_dicom_rt(name_dict,files, save_path):
 	#TO DO: go thru dicom names
 	#to do -- make efficient, save list?
+	print(save_path)
 	if not os.path.isdir(save_path):
 		os.mkdir(save_path)
-	print(files)
+	# print(files)
 	for file in files:
+		# print(file)
 		RS = dcm.read_file(file)
 		for i,seq in enumerate(RS.StructureSetROISequence):
 			roi_name = seq.ROIName

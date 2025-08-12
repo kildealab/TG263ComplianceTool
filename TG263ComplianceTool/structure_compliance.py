@@ -1,6 +1,6 @@
 import re
 import string
-# from thefuzz import process
+# from thefuzz import process, fuzz
 import os
 
 import TG263ComplianceTool.loaders as loaders
@@ -9,10 +9,18 @@ import TG263ComplianceTool.loaders as loaders
 common_mispellings = {
 	'brachialplexus': 'brachialplex',
 	'brachiaplex':'brachialplex',
+	'bronchialtree':'bronchus',
+	'bronchtree':'bronchus',
 	'brstem': 'brainstem',
 	'greatvessels': 'greatves',
 	'left':'L',
 	'right':'R',
+	'nonadj':'nadj',
+	'upper':'S',
+	'inf':'I',
+	'optchiasm':'opticchiasm',
+	'optnerv':'opticnrv',
+	'optnrv':'opticnrv',
 	'opticnerve':'opticnrv',
 	'optnerv':'opticnrv',
 	'optnrv':'opticnrv',
@@ -43,10 +51,10 @@ def check_in_TG(name,tg_names=tg_names):
 	return False
 
 
-def get_proposed_name(name,tg_names=tg_names):
+def get_proposed_name(name,tg_names=tg_names, use_fuzzy = False):
 	reason = ""
 	if (name[0] == 'Z' and len(name) <= 16):
-		return 'z' + name[1:], "Capital Z should be z"
+		return 'z' + name[1:].replace(" ","_"), "Capital Z should be z"
 	if (name[0] == 'z' or name[0] == "_") and ' ' in name and len(name)<= 16:
 		return name.replace(" ","_"), "spaces"
 	
@@ -152,7 +160,7 @@ def get_proposed_name(name,tg_names=tg_names):
 
 		# add suggestions for common mispellings, common mistakes, adding ^ in front of garbage, etc
 		
-		if ('avoid' in name.lower() or 'nos' in name.lower() or 'ring' in name.lower() or ('opt' in name.lower() and 'optic' not in name.lower()) ):  #what to do with opt? since optic nerve
+		if ('avoid' in name.lower() or 'nos' in name.lower() or 'ring' in name.lower() or ('opt' in name.lower() and 'optic' not in name.lower())):  #what to do with opt? since optic nerve
 			if len(name) == 15:
 				return "z"+name.replace(" ","_"), "consider adding z in front if not used for dose eval"
 			elif len(name) < 15:
@@ -161,6 +169,10 @@ def get_proposed_name(name,tg_names=tg_names):
 				return "", "need to start with z but name too long"
 			
 	
+	if use_fuzzy:
+		# print("in fuz")
+		closest_match = process.extractOne(name, tg_names)
+		return closest_match[0], fuzz.ratio(name,closest_match)
 
 	return '',''
 

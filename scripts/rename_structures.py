@@ -26,7 +26,7 @@ def get_name_dict(path_to_conversion='./names_to_convert.csv'):
 	return name_dict
 '''
 
-def get_name_dict(path_to_conversion='./NAMES_TO_CONVERT.csv'):
+def get_name_dict(path_to_conversion='NAMES_TO_CONVERT.csv'):
 	name_dict = {}
 	with open(path_to_conversion) as csv_file:
 		reader = csv.DictReader(csv_file)
@@ -50,7 +50,7 @@ def main():
 
 	if file_type == 'dcm':
 		files = loaders.find_RS_files_recursive(PATH,avoid_root_keywords=['kV_CBCT'])
-		rename_dicom_rt(name_dict, PATH, os.path.join(save_path,"dicom/"))
+		rename_dicom_rt(name_dict, files, os.path.join(save_path,"dicom/"))
 	elif file_type == 'xml':
 		files, names = loaders.load_xml_data(PATH)
 		rename_xml_template(name_dict,files,PATH,os.path.join(save_path,"xml/"))
